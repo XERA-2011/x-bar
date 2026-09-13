@@ -21,9 +21,15 @@ nonisolated enum ScreenCapture {
     /// Returns a Boolean value that indicates whether the app has screen
     /// capture permissions.
     static func checkPermissions() -> Bool {
-        let windowIDs = Bridging.getMenuBarWindowList(option: [.itemsOnly, .activeSpace])
-        diagLog.debug("checkPermissions: checking \(windowIDs.count) menu bar window(s) for title access")
+        // 1. Check Apple's official CoreGraphics preflight API first.
+        if CGPreflightScreenCaptureAccess() {
+            return true
+        }
 
+        // 2. Fallback check: see if any non-owned menu bar window has a non-nil title.
+        // Note: Many system items (Control Center, WiFi, Battery) have NO title by default.
+        // Therefore we must scan all windows and only return true if a title is found.
+        let windowIDs = Bridging.getMenuBarWindowList(option: [.itemsOnly, .activeSpace])
         for windowID in windowIDs {
             guard
                 let window = WindowInfo(windowID: windowID),
@@ -31,15 +37,13 @@ nonisolated enum ScreenCapture {
             else {
                 continue
             }
-            let hasTitle = window.title != nil
-            diagLog.debug("checkPermissions: windowID=\(windowID) pid=\(window.ownerPID) owner=\"\(window.ownerName ?? "nil")\" title=\"\(window.title ?? "nil")\" → hasTitle=\(hasTitle)")
-            return hasTitle
+            if window.title != nil {
+                diagLog.debug("checkPermissions: found titled windowID=\(windowID) pid=\(window.ownerPID) owner=\"\(window.ownerName ?? "nil")\" title=\"\(window.title ?? "nil")\"")
+                return true
+            }
         }
-        // CGPreflightScreenCaptureAccess() only returns an initial value,
-        // but we can use it as a fallback.
-        let preflightResult = CGPreflightScreenCaptureAccess()
-        diagLog.debug("checkPermissions: no suitable non-owned windows found, fallback CGPreflightScreenCaptureAccess() → \(preflightResult)")
-        return preflightResult
+
+        return false
     }
 
     /// Returns a Boolean value that indicates whether the app has screen
@@ -64,9 +68,7 @@ nonisolated enum ScreenCapture {
     /// Requests screen capture permissions.
     static func requestPermissions() {
         diagLog.debug("requestPermissions: requesting screen capture access")
-        // CGRequestScreenCaptureAccess() is broken on newer macOS versions.
-        // Use SCShareableContent.getWithCompletionHandler to trigger the
-        // system screen capture permission prompt instead.
+        _ = CGRequestScreenCaptureAccess()
         SCShareableContent.getWithCompletionHandler { _, _ in
             // Intentionally empty: the call is only used to trigger the
             // system screen capture permission prompt.

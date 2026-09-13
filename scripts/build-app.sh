@@ -119,7 +119,7 @@ fi
 
 # Ad-hoc codesign
 echo "==> Signing ${APP_BUNDLE}..."
-codesign --force --deep -s - "${APP_BUNDLE}"
+codesign --force --deep -s - --identifier "com.xera.xmenubar" "${APP_BUNDLE}"
 
 echo "==> Successfully created ${APP_BUNDLE}"
 ls -lh "${APP_BUNDLE}/Contents/MacOS/XMenuBar"
