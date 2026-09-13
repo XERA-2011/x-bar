@@ -30,7 +30,6 @@ struct MenuBarLayoutSettingsPane: View {
                 }
                 LayoutBarsSection(itemManager: itemManager)
                 spacersCard
-                MenuBarLayoutGroupsSection()
                 layoutSectionsCard
                 iconPreviewsCard
                 advancedLayoutControlsCard
@@ -127,14 +126,6 @@ struct MenuBarLayoutSettingsPane: View {
                 if advancedSettings.enableMenuBarItemOverflow {
                     useXMenuBarBarOnNotchOverflow
                 }
-            }
-        }
-        .onChange(of: appState.navigationState.requestedSettingsDisclosure, initial: true) { _, _ in
-            if SettingsSearchNavigation.consumeDisclosure(
-                .advancedLayoutControls,
-                navigationState: appState.navigationState
-            ) {
-                isAdvancedExpanded = true
             }
         }
     }

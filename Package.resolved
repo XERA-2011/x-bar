@@ -1,15 +1,6 @@
 {
-  "originHash" : "9c0f05e671c265a39aae604e38feb0f50766fc83218db6d1661ddf0a22e0718d",
+  "originHash" : "a99ec325198fb8ea891ebb7accf49a7a8493a4019f17da633cd7e12b346a4979",
   "pins" : [
-    {
-      "identity" : "ifrit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ukushu/Ifrit.git",
-      "state" : {
-        "revision" : "7c889a67bad90c5efefa56889b2d61bfbb831473",
-        "version" : "4.0.0"
-      }
-    },
     {
       "identity" : "launchatlogin-modern",
       "kind" : "remoteSourceControl",

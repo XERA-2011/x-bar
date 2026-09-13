@@ -17,13 +17,6 @@ enum XMenuBarOnboardingWindowMetrics {
 /// The full first-launch experience: the feature tour, then the permissions
 /// decision.
 struct XMenuBarOnboardingView: View {
-    private enum Step {
-        case tour
-        case permissions
-    }
-
-    @State private var step = Step.tour
-
     private let onComplete: () -> Void
 
     /// Creates the reusable onboarding flow.
@@ -33,17 +26,7 @@ struct XMenuBarOnboardingView: View {
     }
 
     var body: some View {
-        Group {
-            switch step {
-            case .tour:
-                XMenuBarOnboardingTour(onFinish: { step = .permissions })
-                    .transition(.opacity)
-            case .permissions:
-                XMenuBarPermissionsView(onContinue: onComplete)
-                    .transition(.opacity)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .animation(.easeInOut(duration: 0.35), value: step)
+        XMenuBarPermissionsView(onContinue: onComplete)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

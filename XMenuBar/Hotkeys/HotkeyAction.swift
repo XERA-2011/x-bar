@@ -11,9 +11,6 @@ nonisolated enum HotkeyAction: String, Codable, CaseIterable {
     case toggleHiddenSection = "ToggleHiddenSection"
     case toggleAlwaysHiddenSection = "ToggleAlwaysHiddenSection"
 
-    /// Menu Bar Items
-    case searchMenuBarItems = "SearchMenuBarItems"
-
     // Other
     case enableIceBar = "EnableIceBar"
     case toggleApplicationMenus = "ToggleApplicationMenus"

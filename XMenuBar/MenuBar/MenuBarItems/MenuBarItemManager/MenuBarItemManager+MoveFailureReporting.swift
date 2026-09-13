@@ -255,18 +255,7 @@ extension MenuBarItemManager {
             report.run(alert, in: settingsWindow)
 
         case .notification:
-            let location = savedURL.map { url in
-                let folder = url.deletingLastPathComponent().path
-                    .replacingOccurrences(of: NSHomeDirectory(), with: "~")
-                return String(localized: "A diagnostic report was saved to \(folder).")
-            } ?? ""
-            appState.userNotificationManager.requestAuthorization()
-            appState.userNotificationManager.addRequest(
-                with: .moveFailed,
-                title: title,
-                body: [description, location].filter { !$0.isEmpty }.joined(separator: ". "),
-                userInfo: savedURL.map { ["reportPath": $0.path] } ?? [:]
-            )
+            break
         }
     }
 }

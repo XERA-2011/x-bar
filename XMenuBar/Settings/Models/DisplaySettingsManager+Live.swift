@@ -45,10 +45,6 @@ extension DisplaySettingsManager {
     /// at launch, and there is nothing to apply anyway: the seeded value is
     /// the one already in effect.
     private func seedSpacingOffsetFromActiveDisplay() {
-        guard let appState else { return }
-        let offset = activeDisplaySpacingOffset
-        appState.spacingManager.offset = offset
-        diagLog.debug("Seeded spacingManager.offset=\(offset) from the active display at setup")
     }
 
     /// Merges info for currently-connected displays into the knownDisplays
@@ -242,59 +238,6 @@ extension DisplaySettingsManager {
     /// Internal rather than private because `configurations`'s `didSet` —
     /// which stays in the measured file — re-derives spacing through it.
     func applyActiveDisplaySpacing(reason: String) {
-        guard let appState else { return }
-        let desired = activeDisplaySpacingOffset
-        // A display transition can fire the relaunch wave with no warning.
-        // When confirmations are enabled and this apply would actually
-        // relaunch apps, ask the user first. Declining keeps the current
-        // on-disk spacing and leaves lastAppliedActiveDisplayUUID untouched
-        // so the next genuine transition re-prompts. The in-pane Apply and
-        // global broadcast carry their own confirmations, so only the
-        // automatic path is gated here.
-        if reason == "screenParametersChanged",
-           confirmSpacingRelaunch,
-           appState.spacingManager.willRelaunch(forOffset: desired),
-           !presentSpacingRelaunchConfirmation()
-        {
-            diagLog.info("User declined the spacing relaunch confirmation for a display transition; skipping apply")
-            return
-        }
-        let previousAppliedUUID = lastAppliedActiveDisplayUUID
-        let appliedUUID = Bridging.getActiveMenuBarDisplayUUID()
-        lastAppliedActiveDisplayUUID = appliedUUID
-        appState.spacingManager.offset = desired
-        Task { [weak self] in
-            guard let self else { return }
-            // Preflight settling so intermediate late-arriver re-sorts and
-            // restore logic are suppressed while the wave runs. Cancelled
-            // below if applyOffset turns out to be a no-op.
-            appState.itemManager.startSettlingPeriod(reason: "spacingRelaunch:\(reason):preflight")
-            do {
-                let outcome = try await appState.spacingManager.applyOffset()
-                if outcome.didRelaunch {
-                    appState.itemManager.startSettlingPeriod(
-                        reason: "spacingRelaunch:\(reason)",
-                        expectedBundleIDs: outcome.recoveredBundleIDs
-                    )
-                } else {
-                    appState.itemManager.cancelSettlingPeriod(
-                        reason: "spacingRelaunch:\(reason):noOp"
-                    )
-                }
-            } catch {
-                appState.itemManager.cancelSettlingPeriod(
-                    reason: "spacingRelaunch:\(reason):error"
-                )
-                // Roll back the bookkeeping so the next screen-parameter
-                // notification is not skipped as a same-display fire and can
-                // retry the failed apply. A newer apply may have overwritten
-                // it while applyOffset was in flight; its bookkeeping wins.
-                if lastAppliedActiveDisplayUUID == appliedUUID {
-                    lastAppliedActiveDisplayUUID = previousAppliedUUID
-                }
-                diagLog.error("applyActiveDisplaySpacing(\(reason)) failed: \(error)")
-            }
-        }
     }
 
     /// Presents an app-modal confirmation before a display transition fires

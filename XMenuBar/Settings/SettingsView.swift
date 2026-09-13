@@ -13,7 +13,6 @@ import SwiftUI
 struct SettingsView: View {
     let appState: AppState
     let navigationState: AppNavigationState
-    @State private var searchModel = SearchModel()
 
     private var allSections: [SettingsNavigationIdentifier] {
         SettingsNavigationIdentifier.allCases
@@ -59,51 +58,30 @@ struct SettingsView: View {
     }
 
     private var sidebar: some View {
-        // Use a Binding that wraps the navigation state to ensure updates happen
-        // on the main thread and avoid view update warnings.
         let selection = Binding<SettingsNavigationIdentifier>(
             get: { navigationState.settingsNavigationIdentifier },
             set: { newValue in
                 if navigationState.settingsNavigationIdentifier != newValue {
                     Task { @MainActor in
-                        SettingsSearchNavigation.selectSidebarPane(
-                            newValue,
-                            navigationState: navigationState
-                        )
+                        navigationState.settingsNavigationIdentifier = newValue
                     }
                 }
             }
         )
 
-        return VStack(spacing: 0) {
-            SearchField(text: $searchModel.searchText)
-
-            if searchModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                List(selection: selection) {
-                    Section {
-                        ForEach(SettingsNavigationIdentifier.allCases) { identifier in
-                            Label {
-                                Text(identifier.localized)
-                            } icon: {
-                                identifier.iconResource.view
-                            }
-                            .tag(identifier)
-                        }
+        return List(selection: selection) {
+            Section {
+                ForEach(SettingsNavigationIdentifier.allCases) { identifier in
+                    Label {
+                        Text(identifier.localized)
+                    } icon: {
+                        identifier.iconResource.view
                     }
-                }
-                .listStyle(.sidebar)
-            } else if searchModel.displayedGroups.isEmpty {
-                SearchEmptyView()
-            } else {
-                SearchResultsList(groups: searchModel.displayedGroups) { entry in
-                    SettingsSearchNavigation.selectSearchResult(
-                        entry,
-                        navigationState: navigationState,
-                        query: &searchModel.searchText
-                    )
+                    .tag(identifier)
                 }
             }
         }
+        .listStyle(.sidebar)
         .navigationSplitViewColumnWidth(ideal: 180, max: 220)
     }
 

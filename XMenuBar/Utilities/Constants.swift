@@ -48,14 +48,6 @@ nonisolated enum Constants {
     /// Info.plist key used to configure the donation URL.
     static let donateURLInfoPlistKey = "XMenuBarDonateURL"
 
-    /// Info.plist key used to configure the executable URI for
-    /// `MenuBarItemSpacingManager` shell commands.
-    static let menuBarItemSpacingExecutableURIInfoPlistKey = "XMenuBarMenuBarItemSpacingExecutableURI"
-
-    /// Info.plist key used to configure the executable URI for `launchctl`,
-    /// which restarts LaunchAgent-owned menu bar items.
-    static let launchctlExecutableURIInfoPlistKey = "XMenuBarLaunchctlExecutableURI"
-
     /// The project's GitHub repository URL.
     static let repositoryURL: URL = requiredInfoPlistURL(repositoryURLInfoPlistKey)
 
@@ -70,12 +62,6 @@ nonisolated enum Constants {
 
     /// The Crowdin project URL for community translations.
     static let translateURL = URL(string: "https://crowdin.com/project/xmenubar")!
-
-    /// The executable URL used by `MenuBarItemSpacingManager`.
-    static let menuBarItemSpacingExecutableURL: URL = requiredInfoPlistURL(menuBarItemSpacingExecutableURIInfoPlistKey)
-
-    /// The `launchctl` executable used by `MenuBarItemSpacingManager`.
-    static let launchctlExecutableURL: URL = requiredInfoPlistURL(launchctlExecutableURIInfoPlistKey)
 
     // MARK: - Helpers
 

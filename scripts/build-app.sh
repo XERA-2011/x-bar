@@ -90,10 +90,6 @@ cat << 'EOF' > "${CONTENTS}/Info.plist"
 	</array>
 	<key>XMenuBarDonateURL</key>
 	<string>https://github.com/sponsors/stonerl</string>
-	<key>XMenuBarMenuBarItemSpacingExecutableURI</key>
-	<string>file:///usr/bin/defaults</string>
-	<key>XMenuBarLaunchctlExecutableURI</key>
-	<string>file:///bin/launchctl</string>
 	<key>XMenuBarRepositoryURL</key>
 	<string>https://github.com/XERA-2011/x-menubar</string>
 	<key>XMenuBarSkyLightFrameworkPath</key>

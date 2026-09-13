@@ -242,6 +242,9 @@ final class MenuBarItemImageCache: @unchecked Sendable {
     /// `@Observable` rather than a Combine `ObservableObject`.
     private var navigationStateObservationTask: Task<Void, Never>?
 
+    /// Task observing `surfaceItemsSeekingAttention`.
+    private var attentionObservationTask: Task<Void, Never>?
+
     /// Task observing `menuBarManager.averageColorInfo` (wave 3), which is
     /// `@Observable` rather than a Combine `ObservableObject`. Bridges into
     /// `colorChangeSubject` so it can still participate in the
@@ -333,6 +336,7 @@ final class MenuBarItemImageCache: @unchecked Sendable {
         liveRefreshTask?.cancel()
         iconRefreshIntervalObservationTask?.cancel()
         navigationStateObservationTask?.cancel()
+        attentionObservationTask?.cancel()
         averageColorInfoObservationTask?.cancel()
         itemCacheObservationTask?.cancel()
     }
@@ -596,7 +600,6 @@ final class MenuBarItemImageCache: @unchecked Sendable {
                 let changes = Observations {
                     (
                         navigationState.isIceBarPresented,
-                        navigationState.isSearchPresented,
                         navigationState.isSettingsPresented,
                         navigationState.settingsNavigationIdentifier,
                         navigationState.isAppFrontmost
@@ -629,6 +632,15 @@ final class MenuBarItemImageCache: @unchecked Sendable {
                     self.startLiveRefreshIfNeeded()
                 }
             }
+
+            self.isAttentionDetectionRequired = advancedSettings.surfaceItemsSeekingAttention
+            attentionObservationTask = Task { @MainActor [weak self] in
+                let changes = Observations { advancedSettings.surfaceItemsSeekingAttention }
+                for await enabled in changes {
+                    guard let self else { return }
+                    self.isAttentionDetectionRequired = enabled
+                }
+            }
         }
 
         cancellables = c
@@ -639,7 +651,6 @@ final class MenuBarItemImageCache: @unchecked Sendable {
     /// Snapshot of navigation state read in a single MainActor hop.
     struct NavigationStateSnapshot {
         let isIceBarPresented: Bool
-        let isSearchPresented: Bool
         let isAppFrontmost: Bool
         let isSettingsPresented: Bool
         let settingsNavigationIdentifier: SettingsNavigationIdentifier?
@@ -653,7 +664,6 @@ final class MenuBarItemImageCache: @unchecked Sendable {
         guard let appState else {
             return NavigationStateSnapshot(
                 isIceBarPresented: false,
-                isSearchPresented: false,
                 isAppFrontmost: false,
                 isSettingsPresented: false,
                 settingsNavigationIdentifier: nil,
@@ -662,7 +672,6 @@ final class MenuBarItemImageCache: @unchecked Sendable {
         }
         return NavigationStateSnapshot(
             isIceBarPresented: appState.navigationState.isIceBarPresented,
-            isSearchPresented: appState.navigationState.isSearchPresented,
             isAppFrontmost: appState.navigationState.isAppFrontmost,
             isSettingsPresented: appState.navigationState.isSettingsPresented,
             settingsNavigationIdentifier: appState.navigationState.settingsNavigationIdentifier,
@@ -721,7 +730,7 @@ final class MenuBarItemImageCache: @unchecked Sendable {
 
     /// Returns whether any visible surface currently needs live item captures.
     private func hasVisibleCaptureConsumer(nav: NavigationStateSnapshot) -> Bool {
-        if nav.isIceBarPresented || nav.isSearchPresented {
+        if nav.isIceBarPresented {
             return true
         }
 
@@ -744,7 +753,6 @@ final class MenuBarItemImageCache: @unchecked Sendable {
         }
         let nav = NavigationStateSnapshot(
             isIceBarPresented: appState.navigationState.isIceBarPresented,
-            isSearchPresented: appState.navigationState.isSearchPresented,
             isAppFrontmost: appState.navigationState.isAppFrontmost,
             isSettingsPresented: appState.navigationState.isSettingsPresented,
             settingsNavigationIdentifier: appState.navigationState.settingsNavigationIdentifier,
@@ -776,7 +784,7 @@ final class MenuBarItemImageCache: @unchecked Sendable {
                 // Already running — don't restart
                 guard self.liveRefreshTask == nil else { return }
                 MenuBarItemImageCache.diagLog.debug(
-                    "Starting live refresh (iceBar=\(nav.isIceBarPresented), search=\(nav.isSearchPresented), settings=\(nav.isSettingsPresented), attention=\(self.isAttentionDetectionRequired))"
+                    "Starting live refresh (iceBar=\(nav.isIceBarPresented), settings=\(nav.isSettingsPresented), attention=\(self.isAttentionDetectionRequired))"
                 )
                 lastSCKRefreshAt = nil
                 lastHiddenRefreshAt = nil
@@ -800,7 +808,7 @@ final class MenuBarItemImageCache: @unchecked Sendable {
     /// The centralized live refresh loop for image updates.
     ///
     /// Runs a single capture loop that serves all consumer views (IceBar,
-    /// Search, Layout Settings) instead of each view running its own loop.
+    /// Layout Settings) instead of each view running its own loop.
     /// Heavy work (`refreshImages`) is `nonisolated` and runs off the main
     /// actor — only navigation state reads happen on `@MainActor`.
     /// Uses `self.appState` (weak property) to avoid retain cycle via
@@ -837,24 +845,8 @@ final class MenuBarItemImageCache: @unchecked Sendable {
             let isLayoutPane = nav.isSettingsPresented
                 && nav.settingsNavigationIdentifier == .menuBarLayout
             let isHotkeyListVisible = false
-            if nav.isSearchPresented || isLayoutPane || isHotkeyListVisible {
-                if nav.isSearchPresented, !isLayoutPane, !isHotkeyListVisible {
-                    // Search is the only consumer here that can be told to
-                    // leave whole sections out of its results; capturing icons
-                    // for rows it will never render is pure waste. The layout
-                    // pane and the hotkey list always show every section, so
-                    // they keep the unfiltered set.
-                    let advanced = appState.settings.advanced
-                    sections = MenuBarSection.Name.allCases.filter { name in
-                        switch name {
-                        case .visible: advanced.searchIncludeVisible
-                        case .hidden: advanced.searchIncludeHidden
-                        case .alwaysHidden: advanced.searchIncludeAlwaysHidden
-                        }
-                    }
-                } else {
-                    sections = MenuBarSection.Name.allCases
-                }
+            if isLayoutPane || isHotkeyListVisible {
+                sections = MenuBarSection.Name.allCases
             } else if nav.isIceBarPresented,
                       let current = appState.menuBarManager.iceBarPanel.currentSection
             {
@@ -2122,7 +2114,7 @@ final class MenuBarItemImageCache: @unchecked Sendable {
             }
         }
 
-        MenuBarItemImageCache.diagLog.debug("updateCache: proceeding with cache update for \(sections.count) sections (iceBar=\(navSnapshot.isIceBarPresented), search=\(navSnapshot.isSearchPresented), background=\(allowBackgroundCapture))")
+        MenuBarItemImageCache.diagLog.debug("updateCache: proceeding with cache update for \(sections.count) sections (iceBar=\(navSnapshot.isIceBarPresented), background=\(allowBackgroundCapture))")
         await updateCacheWithoutChecks(sections: sections)
     }
 
@@ -2144,7 +2136,7 @@ final class MenuBarItemImageCache: @unchecked Sendable {
 
         var sectionsNeedingDisplay = [MenuBarSection.Name]()
 
-        if navSnapshot.isSettingsPresented || navSnapshot.isSearchPresented {
+        if navSnapshot.isSettingsPresented {
             sectionsNeedingDisplay = MenuBarSection.Name.allCases
         } else if navSnapshot.isIceBarPresented, let section = appState.menuBarManager.iceBarPanel
             .currentSection

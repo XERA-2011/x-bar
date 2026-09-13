@@ -40,7 +40,6 @@ extension AppSettings {
         general.rehideInterval = Defaults.DefaultValue.rehideInterval
         general.simpleMode = Defaults.DefaultValue.simpleMode
         general.showSettingDescriptions = Defaults.DefaultValue.showSettingDescriptions
-        appState?.itemGroupManager.apply(nil)
     }
 
     /// Resets Advanced settings to their default values.
@@ -67,13 +66,6 @@ extension AppSettings {
         advanced.useXMenuBarBarOnNotchOverflow = Defaults.DefaultValue.useXMenuBarBarOnNotchOverflow
         advanced.automaticArrangementEnabled = Defaults.DefaultValue.automaticArrangementEnabled
         advanced.useAXClickDelivery = Defaults.DefaultValue.useAXClickDelivery
-        advanced.searchSectionOrder = AdvancedSettings.sanitizedSearchSectionOrder(
-            from: Defaults.DefaultValue.searchSectionOrder
-        )
-        advanced.searchIncludeVisible = Defaults.DefaultValue.searchIncludeVisible
-        advanced.searchIncludeHidden = Defaults.DefaultValue.searchIncludeHidden
-        advanced.searchIncludeAlwaysHidden = Defaults.DefaultValue.searchIncludeAlwaysHidden
-        advanced.moveCursorToRevealedItem = Defaults.DefaultValue.moveCursorToRevealedItem
     }
 
     /// Resets Hotkeys settings to their default values.

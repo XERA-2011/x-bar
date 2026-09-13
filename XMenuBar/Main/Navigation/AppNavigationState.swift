@@ -12,24 +12,15 @@ import Observation
 @MainActor
 @Observable
 final class AppNavigationState {
-    /// A specific control group within a settings pane that a search result
-    /// can request be revealed/expanded when navigating to that pane.
-    nonisolated enum SettingsDisclosure: Hashable {
-        case advancedLayoutControls
-    }
-
     var isAppFrontmost = false
     var isSettingsPresented = false
     var isIceBarPresented = false
-    var isSearchPresented = false
     var settingsNavigationIdentifier: SettingsNavigationIdentifier = .general {
         didSet {
             // Reopen the settings window on the pane the user last used.
             Defaults.set(settingsNavigationIdentifier.rawValue, forKey: .lastSettingsPane)
         }
     }
-
-    var requestedSettingsDisclosure: SettingsDisclosure?
 
     init() {
         // Reopen the settings window on the pane the user last used. A pane

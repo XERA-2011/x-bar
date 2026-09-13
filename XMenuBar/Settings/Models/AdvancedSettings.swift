@@ -324,55 +324,6 @@ final class AdvancedSettings {
         }
     }
 
-    /// The order in which menu bar sections appear in the search panel.
-    var searchSectionOrder: [MenuBarSection.Name] = Defaults.DefaultValue.searchSectionOrder
-        .compactMap(MenuBarSection.Name.init(rawValue:))
-    {
-        didSet {
-            guard oldValue != searchSectionOrder else { return }
-            Defaults.set(searchSectionOrder.map(\.rawValue), forKey: .searchSectionOrder)
-        }
-    }
-
-    /// A Boolean value that indicates whether items from the visible section
-    /// are included in the menu bar search panel.
-    var searchIncludeVisible = Defaults.DefaultValue.searchIncludeVisible {
-        didSet {
-            guard oldValue != searchIncludeVisible else { return }
-            Defaults.set(searchIncludeVisible, forKey: .searchIncludeVisible)
-        }
-    }
-
-    /// A Boolean value that indicates whether items from the hidden section
-    /// are included in the menu bar search panel.
-    var searchIncludeHidden = Defaults.DefaultValue.searchIncludeHidden {
-        didSet {
-            guard oldValue != searchIncludeHidden else { return }
-            Defaults.set(searchIncludeHidden, forKey: .searchIncludeHidden)
-        }
-    }
-
-    /// A Boolean value that indicates whether items from the always-hidden section
-    /// are included in the menu bar search panel.
-    var searchIncludeAlwaysHidden = Defaults.DefaultValue.searchIncludeAlwaysHidden {
-        didSet {
-            guard oldValue != searchIncludeAlwaysHidden else { return }
-            Defaults.set(searchIncludeAlwaysHidden, forKey: .searchIncludeAlwaysHidden)
-        }
-    }
-
-    /// A Boolean value that indicates whether the mouse pointer is moved to a
-    /// menu bar item that was opened from the search panel.
-    ///
-    /// Only the search panel warps the pointer. Opening an item from the XMenuBar
-    /// Bar means the pointer is already there, so moving it would only take it
-    /// somewhere the user did not put it.
-    var moveCursorToRevealedItem = Defaults.DefaultValue.moveCursorToRevealedItem {
-        didSet {
-            guard oldValue != moveCursorToRevealedItem else { return }
-            Defaults.set(moveCursorToRevealedItem, forKey: .moveCursorToRevealedItem)
-        }
-    }
 
     /// Whether menu bar items are drawn as their owning application's icon
     /// instead of a live capture.
@@ -463,10 +414,6 @@ final class AdvancedSettings {
         Defaults.ifPresent(key: .automaticArrangementEnabled, assign: &automaticArrangementEnabled)
         Defaults.ifPresent(key: .useXMenuBarBarOnNotchOverflow, assign: &useXMenuBarBarOnNotchOverflow)
         Defaults.ifPresent(key: .useAXClickDelivery, assign: &useAXClickDelivery)
-        Defaults.ifPresent(key: .searchIncludeVisible, assign: &searchIncludeVisible)
-        Defaults.ifPresent(key: .searchIncludeHidden, assign: &searchIncludeHidden)
-        Defaults.ifPresent(key: .searchIncludeAlwaysHidden, assign: &searchIncludeAlwaysHidden)
-        Defaults.ifPresent(key: .moveCursorToRevealedItem, assign: &moveCursorToRevealedItem)
         Defaults.ifPresent(key: .surfaceItemsSeekingAttention, assign: &surfaceItemsSeekingAttention)
         Defaults.ifPresent(key: .alwaysUseAppIconForMenuBarItems, assign: &alwaysUseAppIconForMenuBarItems)
 
@@ -476,25 +423,10 @@ final class AdvancedSettings {
             }
         }
 
-        Defaults.ifPresent(key: .searchSectionOrder) { (rawValues: [String]) in
-            searchSectionOrder = Self.sanitizedSearchSectionOrder(from: rawValues)
-        }
-
         // One authoritative apply once every setting is in place. The `didSet`
         // observers tripped above each applied a partially loaded policy, and
         // none of them reached the service.
         applyLogRotationPolicy()
-    }
-
-    /// Returns a search-section order that contains each `MenuBarSection.Name`
-    /// case exactly once, using the supplied raw values as the preferred order
-    /// and filling any missing cases at the end. Returns the default order if
-    /// the input is unusable.
-    static func sanitizedSearchSectionOrder(from rawValues: [String]) -> [MenuBarSection.Name] {
-        let preferred = Array(
-            rawValues.compactMap(MenuBarSection.Name.init(rawValue:)).uniqued()
-        )
-        return preferred + MenuBarSection.Name.allCases.filter { !preferred.contains($0) }
     }
 
     /// Configures the internal observers for the model.
@@ -542,14 +474,6 @@ final class AdvancedSettings {
                 useXMenuBarBarOnNotchOverflow = boolValue
             case "useAXClickDelivery":
                 useAXClickDelivery = boolValue
-            case "searchIncludeVisible":
-                searchIncludeVisible = boolValue
-            case "searchIncludeHidden":
-                searchIncludeHidden = boolValue
-            case "searchIncludeAlwaysHidden":
-                searchIncludeAlwaysHidden = boolValue
-            case "moveCursorToRevealedItem":
-                moveCursorToRevealedItem = boolValue
             case "surfaceItemsSeekingAttention":
                 surfaceItemsSeekingAttention = boolValue
             case "alwaysUseAppIconForMenuBarItems":

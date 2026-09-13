@@ -40,9 +40,6 @@ final class AppState {
     /// Manager for the state of the menu bar.
     let menuBarManager = MenuBarManager()
 
-    /// Manager for menu bar item spacing.
-    let spacingManager = MenuBarItemSpacingManager()
-
     /// Manager for menu bar items.
     let itemManager = MenuBarItemManager()
 
@@ -52,17 +49,11 @@ final class AppState {
     /// Owner of the user's menu bar spacer items.
     let spacerManager = MenuBarSpacerManager()
 
-    /// Owner of user-authored menu bar item groups.
-    let itemGroupManager = MenuBarItemGroupManager()
-
     /// Manager for input events received by the app.
     let hidEventManager = HIDEventManager()
 
     /// Manager for app updates.
     let updatesManager = UpdatesManager()
-
-    /// Manager for user notifications.
-    let userNotificationManager = UserNotificationManager()
 
     /// Engages zen mode while the screen is mirrored or being shared.
     let presentationMonitor = PresentationMonitor()
@@ -140,7 +131,6 @@ final class AppState {
         spacerManager.performSetup(with: self)
         presentationMonitor.performSetup(with: self)
         updatesManager.performSetup(with: self)
-        userNotificationManager.performSetup(with: self)
 
         configureCancellables()
         diagLog.debug("setupTask: AppState setup sequence complete")

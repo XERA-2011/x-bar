@@ -1320,7 +1320,7 @@ extension MenuBarItemManager {
                 items: items,
                 screen: screen,
                 notch: notch,
-                spacingOffset: appState.spacingManager.offset
+                spacingOffset: 0
             )
             let rightBoundary = budget.rightBoundary
             var availableWidth = budget.availableWidth

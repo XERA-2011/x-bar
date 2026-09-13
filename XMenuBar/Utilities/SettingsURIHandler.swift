@@ -47,10 +47,6 @@ enum SettingsURIHandler {
         "iceBarLocationOnHotkey",
         "enableMenuBarItemOverflow",
         "useXMenuBarBarOnNotchOverflow",
-        "searchIncludeVisible",
-        "searchIncludeHidden",
-        "searchIncludeAlwaysHidden",
-        "moveCursorToRevealedItem",
     ]
 
     /// Double/numeric settings with ranges
@@ -97,10 +93,6 @@ enum SettingsURIHandler {
         "iceBarLocationOnHotkey": .iceBarLocationOnHotkey,
         "enableMenuBarItemOverflow": .enableMenuBarItemOverflow,
         "useXMenuBarBarOnNotchOverflow": .useXMenuBarBarOnNotchOverflow,
-        "searchIncludeVisible": .searchIncludeVisible,
-        "searchIncludeHidden": .searchIncludeHidden,
-        "searchIncludeAlwaysHidden": .searchIncludeAlwaysHidden,
-        "moveCursorToRevealedItem": .moveCursorToRevealedItem,
         "rehideInterval": .rehideInterval,
         "showOnHoverDelay": .showOnHoverDelay,
         "tooltipDelay": .tooltipDelay,

@@ -34,6 +34,9 @@ struct GeneralSettingsPane: View {
             IceSection("While rearranging") {
                 showAllSectionsOnUserDrag
             }
+            IceSection("Icon attention") {
+                attentionOptions
+            }
             IceSection("After revealing") {
                 rehideOptions
             }
@@ -170,5 +173,16 @@ struct GeneralSettingsPane: View {
                 )
             }
         }
+    }
+
+    // MARK: Attention Options
+
+    @ViewBuilder
+    private var attentionOptions: some View {
+        Toggle(
+            "自动展开有新通知的图标",
+            isOn: $advancedSettings.surfaceItemsSeekingAttention
+        )
+        .annotation("当隐藏区的图标状态发生变化（如闪烁或收到新消息）时自动展开。开启后后台会定期采样检测图标变化，可能略微增加耗电。")
     }
 }

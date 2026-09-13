@@ -203,14 +203,6 @@ nonisolated extension Defaults {
         static let useXMenuBarBarOnNotchOverflow = true
         static let useAXClickDelivery = true
 
-        // MARK: Search
-
-        static let rememberSearchQuery = false
-        static let searchSectionOrder: [String] = ["visible", "hidden", "alwaysHidden"]
-        static let searchIncludeVisible = true
-        static let searchIncludeHidden = true
-        static let searchIncludeAlwaysHidden = true
-        static let moveCursorToRevealedItem = false
 
         // MARK: Hotkeys Settings
 
@@ -308,19 +300,7 @@ nonisolated extension Defaults {
         case useXMenuBarBarOnNotchOverflow = "UseXMenuBarBarOnNotchOverflow"
         case useAXClickDelivery = "UseAXClickDelivery"
 
-        // MARK: Search
-
-        case rememberSearchQuery = "RememberSearchQuery"
-        case searchSectionOrder = "SearchSectionOrder"
-        case searchIncludeVisible = "SearchIncludeVisible"
-        case searchIncludeHidden = "SearchIncludeHidden"
-        case searchIncludeAlwaysHidden = "SearchIncludeAlwaysHidden"
-        case moveCursorToRevealedItem = "MoveCursorToRevealedItem"
-
         // MARK: Internal
-
-        case menuBarSearchPanelFrame = "MenuBarSearchPanelFrame"
-        case menuBarSearchPanelFrameWithConfig = "MenuBarSearchPanelFrame_"
 
         // MARK: Menu Bar Item Custom Names
 

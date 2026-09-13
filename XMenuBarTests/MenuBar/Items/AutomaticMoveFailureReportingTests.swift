@@ -153,34 +153,5 @@ struct AutomaticMoveFailureReportingTests {
         #expect(
             MenuBarItemManager.automaticMoveFailurePresentationRoute(settingsWindowVisible: false)
                 == .notification
-        )
-    }
-
-    @Test("A live report path is revealed from its notification")
-    func liveNotificationReportIsRevealed() {
-        let path = "/tmp/XMenuBar-move-diagnostic.txt"
-
-        #expect(
-            UserNotificationManager.moveFailureOpenAction(
-                reportPath: path,
-                reportExists: true
-            ) == .revealReport(URL(fileURLWithPath: path))
-        )
-    }
-
-    @Test("A missing or pruned notification report falls back to Settings")
-    func missingNotificationReportOpensSettings() {
-        #expect(
-            UserNotificationManager.moveFailureOpenAction(
-                reportPath: nil,
-                reportExists: false
-            ) == .openSettings
-        )
-        #expect(
-            UserNotificationManager.moveFailureOpenAction(
-                reportPath: "/tmp/pruned-report.txt",
-                reportExists: false
-            ) == .openSettings
-        )
     }
 }

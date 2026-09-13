@@ -54,11 +54,6 @@ $(SRCROOT)/XMenuBar/MenuBar/ControlItem/ControlItem.swift
 $(SRCROOT)/XMenuBar/MenuBar/ControlItem/ControlItemImage.swift
 $(SRCROOT)/XMenuBar/MenuBar/ControlItem/ControlItemImageSet.swift
 $(SRCROOT)/XMenuBar/MenuBar/ControlItem/ControlItemOcclusion.swift
-$(SRCROOT)/XMenuBar/MenuBar/Groups/MenuBarItemGroup.swift
-$(SRCROOT)/XMenuBar/MenuBar/Groups/MenuBarItemGroupManager.swift
-$(SRCROOT)/XMenuBar/MenuBar/Groups/MenuBarItemGroupPolicy.swift
-$(SRCROOT)/XMenuBar/MenuBar/Groups/MenuBarItemGroupResolution.swift
-$(SRCROOT)/XMenuBar/MenuBar/Groups/MenuBarItemGrouping.swift
 $(SRCROOT)/XMenuBar/MenuBar/IceBar/IceBar.swift
 $(SRCROOT)/XMenuBar/MenuBar/IceBar/IceBarColorManager.swift
 $(SRCROOT)/XMenuBar/MenuBar/IceBar/IceBarLayout.swift
@@ -114,18 +109,9 @@ $(SRCROOT)/XMenuBar/MenuBar/MenuBarManager.swift
 $(SRCROOT)/XMenuBar/MenuBar/MenuBarSection.swift
 $(SRCROOT)/XMenuBar/MenuBar/MenuBarSectionLayout.swift
 $(SRCROOT)/XMenuBar/MenuBar/PresentationMonitor.swift
-$(SRCROOT)/XMenuBar/MenuBar/Search/MenuBarSearchModel.swift
-$(SRCROOT)/XMenuBar/MenuBar/Search/MenuBarSearchPanel.swift
-$(SRCROOT)/XMenuBar/MenuBar/Spacing/MenuBarItemSpacingError.swift
-$(SRCROOT)/XMenuBar/MenuBar/Spacing/MenuBarItemSpacingManager.swift
-$(SRCROOT)/XMenuBar/MenuBar/Spacing/SystemLaunchAgentIndex.swift
 $(SRCROOT)/XMenuBar/Onboarding/GlassSupport.swift
 $(SRCROOT)/XMenuBar/Onboarding/OnboardingPermissionsView.swift
 $(SRCROOT)/XMenuBar/Onboarding/OnboardingView.swift
-$(SRCROOT)/XMenuBar/Onboarding/Tour/OnboardingTour.swift
-$(SRCROOT)/XMenuBar/Onboarding/Tour/TourMockups.swift
-$(SRCROOT)/XMenuBar/Onboarding/Tour/TourSlide.swift
-$(SRCROOT)/XMenuBar/Onboarding/Tour/WelcomeMockup.swift
 $(SRCROOT)/XMenuBar/Permissions/AppPermissions.swift
 $(SRCROOT)/XMenuBar/Permissions/Permission.swift
 $(SRCROOT)/XMenuBar/Permissions/PermissionsView.swift
@@ -153,11 +139,6 @@ $(SRCROOT)/XMenuBar/Settings/Models/SectionDividerStyle.swift
 $(SRCROOT)/XMenuBar/Settings/Models/SettingsResetter.swift
 $(SRCROOT)/XMenuBar/Settings/Models/XMenuBarFocusModeStore.swift
 $(SRCROOT)/XMenuBar/Settings/Models/TriggerFeatureFlags.swift
-$(SRCROOT)/XMenuBar/Settings/Search/SearchIndex.swift
-$(SRCROOT)/XMenuBar/Settings/Search/SearchModel.swift
-$(SRCROOT)/XMenuBar/Settings/Search/SearchRanker.swift
-$(SRCROOT)/XMenuBar/Settings/Search/SearchViews.swift
-$(SRCROOT)/XMenuBar/Settings/Search/SettingsSearchNavigation.swift
 $(SRCROOT)/XMenuBar/Settings/SettingsDetailStyle.swift
 $(SRCROOT)/XMenuBar/Settings/SettingsPanes/AboutSettingsPane.swift
 $(SRCROOT)/XMenuBar/Settings/SettingsPanes/Advanced/CaptureInspectorSection.swift
@@ -170,7 +151,6 @@ $(SRCROOT)/XMenuBar/Settings/SettingsPanes/General/IceIconPicker.swift
 $(SRCROOT)/XMenuBar/Settings/SettingsPanes/GeneralSettingsPane.swift
 $(SRCROOT)/XMenuBar/Settings/SettingsPanes/HotkeysSettingsPane.swift
 $(SRCROOT)/XMenuBar/Settings/SettingsPanes/Layout/LayoutBarsSection.swift
-$(SRCROOT)/XMenuBar/Settings/SettingsPanes/Layout/MenuBarLayoutGroupsSection.swift
 $(SRCROOT)/XMenuBar/Settings/SettingsPanes/MenuBarAppearanceSettingsPane.swift
 $(SRCROOT)/XMenuBar/Settings/SettingsPanes/MenuBarLayoutSettingsPane.swift
 $(SRCROOT)/XMenuBar/Settings/SettingsPanes/ProfilePreviewView.swift
@@ -204,8 +184,6 @@ $(SRCROOT)/XMenuBar/UI/Views/MenuBarItemContainer.swift
 $(SRCROOT)/XMenuBar/UI/Views/SecondsLabel.swift
 $(SRCROOT)/XMenuBar/UI/Views/SectionedList.swift
 $(SRCROOT)/XMenuBar/UI/Views/SettingsWarningPill.swift
-$(SRCROOT)/XMenuBar/UserNotifications/UserNotificationIdentifier.swift
-$(SRCROOT)/XMenuBar/UserNotifications/UserNotificationManager.swift
 $(SRCROOT)/XMenuBar/Utilities/AccessibilityAnnouncements.swift
 $(SRCROOT)/XMenuBar/Utilities/ApplicationTermination.swift
 $(SRCROOT)/XMenuBar/Utilities/ConcurrencyHelpers.swift
@@ -219,7 +197,6 @@ $(SRCROOT)/XMenuBar/Utilities/Extensions.swift
 $(SRCROOT)/XMenuBar/Utilities/Helpers.swift
 $(SRCROOT)/XMenuBar/Utilities/HookProcess.swift
 $(SRCROOT)/XMenuBar/Utilities/HookRunner.swift
-$(SRCROOT)/XMenuBar/Utilities/IceSettingsImporter.swift
 $(SRCROOT)/XMenuBar/Utilities/IconResource.swift
 $(SRCROOT)/XMenuBar/Utilities/ImageHashing.swift
 $(SRCROOT)/XMenuBar/Utilities/LocalizedErrorWrapper.swift

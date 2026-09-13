@@ -19,7 +19,6 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-async-algorithms.git", "1.0.0" ..< "1.1.0"),
         .package(url: "https://github.com/apple/swift-algorithms.git", "1.2.0" ..< "1.3.0"),
         .package(url: "https://github.com/apple/swift-collections.git", exact: "1.1.4"),
-        .package(url: "https://github.com/ukushu/Ifrit.git", from: "4.0.0"),
     ],
     targets: [
         .executableTarget(
@@ -30,7 +29,6 @@ let package = Package(
                 .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
                 .product(name: "Algorithms", package: "swift-algorithms"),
                 .product(name: "Collections", package: "swift-collections"),
-                .product(name: "IfritStatic", package: "Ifrit"),
             ],
             path: "XMenuBar",
             exclude: [

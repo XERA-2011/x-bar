@@ -130,9 +130,6 @@ final class MenuBarManager {
     /// The panel that contains the XMenuBar Bar interface.
     let iceBarPanel = IceBarPanel()
 
-    /// The panel that contains the menu bar search interface.
-    let searchPanel = MenuBarSearchPanel()
-
     /// The popover that contains a portable version of the menu bar
     /// layout editor interface
     let layoutEditorPanel = MenuBarLayoutEditorPanel()
@@ -155,7 +152,6 @@ final class MenuBarManager {
         self.appState = appState
         configureCancellables()
         iceBarPanel.performSetup(with: appState)
-        searchPanel.performSetup(with: appState)
         layoutEditorPanel.performSetup(with: appState)
         for section in sections {
             section.performSetup(with: appState)
@@ -610,10 +606,9 @@ final class MenuBarManager {
         // Only update if we really need the color info
         let isSettingsVisible = settingsWindow?.isVisible == true
         let isIceBarVisible = appState.navigationState.isIceBarPresented
-        let isSearchVisible = appState.navigationState.isSearchPresented
         let anyIceBarEnabled = appState.settings.displaySettings.isIceBarEnabledOnAnyDisplay
 
-        guard isSettingsVisible || isIceBarVisible || isSearchVisible || anyIceBarEnabled else {
+        guard isSettingsVisible || isIceBarVisible || anyIceBarEnabled else {
             return
         }
 

@@ -11,11 +11,8 @@ import Foundation
 /// A type that brings settings written by an earlier version of the app up to
 /// the current format.
 ///
-/// Migrations for Ice's `0.8.0` through `0.11.13.1` releases used to live here.
-/// XMenuBar has only ever read its own defaults domain, `com.xera.xmenubar`, and no
-/// XMenuBar release wrote those older formats into it, so none of them could run.
-/// Settings that do come from Ice arrive through ``IceSettingsImporter``, which
-/// converts them as it reads them.
+/// Migrations for older releases used to live here.
+/// XMenuBar reads its own defaults domain, `com.xera.xmenubar`.
 @MainActor
 struct MigrationManager {
     private let diagLog = DiagLog(category: "Migration")
