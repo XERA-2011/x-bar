@@ -113,8 +113,10 @@ while IFS= read -r png; do
     cp -p "$png" "${RESOURCES}/${name}@2x.png"
 done < <(find "${ROOT_DIR}/XMenuBar/Resources/Assets.xcassets" -name "*.png")
 
-# Generate and copy AppIcon.icns
-if [[ -f "/tmp/AppIcon.icns" ]]; then
+# Copy AppIcon.icns
+if [[ -f "${ROOT_DIR}/XMenuBar/Resources/AppIcon.icns" ]]; then
+    cp -p "${ROOT_DIR}/XMenuBar/Resources/AppIcon.icns" "${RESOURCES}/AppIcon.icns"
+elif [[ -f "/tmp/AppIcon.icns" ]]; then
     cp -p /tmp/AppIcon.icns "${RESOURCES}/AppIcon.icns"
 fi
 
