@@ -40,9 +40,6 @@ final class AppState {
     /// Manager for the state of the menu bar.
     let menuBarManager = MenuBarManager()
 
-    /// Manager for the menu bar's appearance.
-    let appearanceManager = MenuBarAppearanceManager()
-
     /// Manager for menu bar item spacing.
     let spacingManager = MenuBarItemSpacingManager()
 
@@ -60,9 +57,6 @@ final class AppState {
 
     /// Manager for input events received by the app.
     let hidEventManager = HIDEventManager()
-
-    /// Manager for settings profiles.
-    let profileManager = ProfileManager()
 
     /// Manager for app updates.
     let updatesManager = UpdatesManager()
@@ -109,13 +103,6 @@ final class AppState {
     /// view body, so the exemption has no UI-observability effect.
     @ObservationIgnored
     private lazy var setupTask = Task { @MainActor in
-        // Rotation mints a new file, and the XPC service is still holding the
-        // old one. Installed before logging starts so even the first rotation
-        // brings the service along.
-        DiagnosticLogger.shared.onRotate = {
-            Task { await MenuBarItemService.Connection.shared.syncLogging() }
-        }
-
         // Opening a log file prunes the directory, so the stored retention has
         // to be in place before logging starts — the settings model that would
         // otherwise supply it is not built until later in this task.
@@ -139,16 +126,9 @@ final class AppState {
         menuBarManager.performSetup(with: self)
         diagLog.debug("setupTask: settings and menuBarManager setup complete")
 
-        diagLog.debug("setupTask: starting MenuBarItemService XPC connection")
         await MenuBarItemService.Connection.shared.start()
-        diagLog.debug("setupTask: MenuBarItemService XPC connection started")
-        // Capture is optional: don't block item/manager setup if the helper is slow.
-        Task {
-            await MenuBarCaptureService.Connection.shared.start()
-        }
-        diagLog.debug("setupTask: MenuBarCaptureService XPC start kicked off")
+        await MenuBarCaptureService.Connection.shared.start()
 
-        appearanceManager.performSetup(with: self)
         hidEventManager.performSetup(with: self)
         diagLog.debug("setupTask: starting itemManager setup")
         await itemManager.performSetup(with: self)
@@ -161,7 +141,6 @@ final class AppState {
         presentationMonitor.performSetup(with: self)
         updatesManager.performSetup(with: self)
         userNotificationManager.performSetup(with: self)
-        profileManager.performSetup(with: self)
 
         configureCancellables()
         diagLog.debug("setupTask: AppState setup sequence complete")

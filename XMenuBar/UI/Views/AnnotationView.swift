@@ -140,13 +140,20 @@ struct AnnotationView<Parent: View, Content: View, ForegroundStyle: ShapeStyle>:
     }
 }
 
+private struct SettingsDescriptionsVisibleKey: EnvironmentKey {
+    static let defaultValue: Bool = true
+}
+
 extension EnvironmentValues {
     /// Whether explanatory captions below settings rows are shown.
     ///
     /// Defaults to `true` so surfaces outside the settings window (such as
     /// the standalone appearance editor) keep their captions regardless of
     /// the "Show setting descriptions" preference.
-    @Entry var settingsDescriptionsVisible: Bool = true
+    var settingsDescriptionsVisible: Bool {
+        get { self[SettingsDescriptionsVisibleKey.self] }
+        set { self[SettingsDescriptionsVisibleKey.self] = newValue }
+    }
 }
 
 extension View {

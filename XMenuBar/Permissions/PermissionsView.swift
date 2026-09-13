@@ -303,21 +303,3 @@ struct PermissionCard: View {
         }
     }
 }
-
-/// A lightweight stand-in for ``AppPermissions`` used by the preview, so it
-/// doesn't need to spin up the real manager and its app machinery.
-@MainActor
-@Observable
-private final class MockPermissionsManager: PermissionsManaging {
-    var permissionsState: AppPermissions.PermissionsState = .missing
-
-    let allPermissions: [Permission] = [
-        AccessibilityPermission(),
-        ScreenRecordingPermission(),
-    ]
-}
-
-#Preview {
-    PermissionsView(manager: MockPermissionsManager())
-        .environment(AppState())
-}

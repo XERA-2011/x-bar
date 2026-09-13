@@ -7,6 +7,7 @@
 //  Licensed under the GNU GPLv3
 
 import CoreGraphics
+import Foundation
 
 /// Information for a desktop space.
 struct SpaceInfo: Hashable {

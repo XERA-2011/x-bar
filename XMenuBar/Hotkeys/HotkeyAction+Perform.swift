@@ -67,9 +67,6 @@ extension HotkeyAction {
                     : String(localized: "Zen mode is off"),
                 body: ""
             )
-        case .profileApply:
-            // Handled externally by ProfileManager's custom registration.
-            break
         case .openMenuBarItem:
             // Handled externally by MenuBarManager's per-item registration.
             break

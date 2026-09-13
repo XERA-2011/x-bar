@@ -50,8 +50,6 @@ struct GeneralSettingsPane: View {
         LaunchAtLogin.Toggle {
             Text("Launch at Login")
         }
-        Toggle("Simple Mode", isOn: $settings.simpleMode)
-            .annotation("Shows only the essential settings. All features keep working and keep their configuration.")
         Toggle("Show setting descriptions", isOn: $settings.showSettingDescriptions)
             .annotation("Explains what a setting does directly beneath it, like this text.")
     }

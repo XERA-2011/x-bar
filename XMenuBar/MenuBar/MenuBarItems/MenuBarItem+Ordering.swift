@@ -6,6 +6,7 @@
 //  Copyright (XMenuBar) © 2026 Toni Förster
 //  Licensed under the GNU GPLv3
 
+import CoreGraphics
 import Foundation
 
 nonisolated extension MenuBarItem {

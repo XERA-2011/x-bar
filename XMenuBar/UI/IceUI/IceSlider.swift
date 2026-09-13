@@ -6,21 +6,22 @@
 //  Copyright (XMenuBar) © 2026 Toni Förster
 //  Licensed under the GNU GPLv3
 
-import CompactSlider
 import SwiftUI
 
-struct IceSlider<Value: BinaryFloatingPoint, ValueLabel: View>: View {
+struct IceSlider: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Binding private var value: Value
+    @Binding private var value: Double
 
-    private let bounds: ClosedRange<Value>
-    private let step: Value?
+    private let bounds: ClosedRange<Double>
+    private let step: Double?
     private let reversed: Bool
     private let showsValue: Bool
     private let unit: String?
-    private let valueLabel: ValueLabel
+    private let valueLabel: AnyView
 
-    init(
+    @State private var isLabelActive: Bool
+
+    init<Value: BinaryFloatingPoint, ValueLabel: View>(
         value: Binding<Value>,
         in bounds: ClosedRange<Value>,
         step: Value? = nil,
@@ -29,16 +30,20 @@ struct IceSlider<Value: BinaryFloatingPoint, ValueLabel: View>: View {
         unit: String? = nil,
         @ViewBuilder valueLabel: () -> ValueLabel
     ) {
-        self._value = value
-        self.bounds = bounds
-        self.step = step
+        self._value = Binding(
+            get: { Double(value.wrappedValue) },
+            set: { value.wrappedValue = Value($0) }
+        )
+        self.bounds = Double(bounds.lowerBound)...Double(bounds.upperBound)
+        self.step = step.map { Double($0) }
         self.reversed = reversed
         self.showsValue = showsValue
         self.unit = unit
-        self.valueLabel = valueLabel()
+        self.valueLabel = AnyView(valueLabel())
+        self._isLabelActive = State(initialValue: false)
     }
 
-    init(
+    init<Value: BinaryFloatingPoint>(
         _ valueLabelKey: LocalizedStringKey,
         value: Binding<Value>,
         in bounds: ClosedRange<Value>,
@@ -46,17 +51,18 @@ struct IceSlider<Value: BinaryFloatingPoint, ValueLabel: View>: View {
         reversed: Bool = false,
         showsValue: Bool = false,
         unit: String? = nil
-    ) where ValueLabel == Text {
-        self._value = value
-        self.bounds = bounds
-        self.step = step
-        self.reversed = reversed
-        self.showsValue = showsValue
-        self.unit = unit
-        self.valueLabel = Text(valueLabelKey)
+    ) {
+        self.init(
+            value: value,
+            in: bounds,
+            step: step,
+            reversed: reversed,
+            showsValue: showsValue,
+            unit: unit
+        ) {
+            Text(valueLabelKey)
+        }
     }
-
-    @State private var isLabelActive = false
 
     private var height: CGFloat {
         24
@@ -66,17 +72,34 @@ struct IceSlider<Value: BinaryFloatingPoint, ValueLabel: View>: View {
         RoundedRectangle(cornerRadius: 10, style: .continuous)
     }
 
+    private var progress: Double {
+        let span = bounds.upperBound - bounds.lowerBound
+        guard span > 0 else { return 0 }
+        let current = value - bounds.lowerBound
+        return min(max(current / span, 0), 1)
+    }
+
+    private func updateValue(for progress: Double) {
+        let span = bounds.upperBound - bounds.lowerBound
+        var newValue = bounds.lowerBound + (progress * span)
+        if let step = step {
+            newValue = (newValue / step).rounded() * step
+        }
+        let clamped = min(max(newValue, bounds.lowerBound), bounds.upperBound)
+        value = clamped
+    }
+
     var body: some View {
-        CompactSlider(value: $value, in: bounds, step: step ?? 0)
-            .frame(height: height)
-            .onContinuousHover { phase in
-                if case .active = phase {
-                    isLabelActive = true
-                } else {
-                    isLabelActive = false
-                }
-            }
-            .overlay {
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            let fillWidth = max(0, min(width, width * progress))
+            ZStack(alignment: reversed ? .trailing : .leading) {
+                // Progress fill
+                Rectangle()
+                    .fill(Color.accentColor.opacity(0.85))
+                    .frame(width: fillWidth)
+
+                // Label and value overlay
                 HStack(spacing: 4) {
                     valueLabel
                         .scaleEffect(x: reversed ? -1 : 1, y: 1)
@@ -101,25 +124,33 @@ struct IceSlider<Value: BinaryFloatingPoint, ValueLabel: View>: View {
                 }
                 .padding(.horizontal, 8)
                 .frame(height: height)
-                .opacity(isLabelActive ? 0.65 : 0.45)
+                .opacity(isLabelActive ? 0.9 : 0.6)
                 .animation(reduceMotion ? nil : .easeInOut(duration: 0.15), value: isLabelActive)
                 .allowsHitTesting(false)
             }
-            .glassEffect(.regular, in: borderShape)
-            .overlay(
-                borderShape.strokeBorder(.separator, lineWidth: 0.5)
+            .contentShape(borderShape)
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { gesture in
+                        let locationX = reversed ? (width - gesture.location.x) : gesture.location.x
+                        let newProgress = max(0, min(1, Double(locationX / width)))
+                        updateValue(for: newProgress)
+                    }
             )
-            .compactSliderHandleStyle(.hidden())
-            .compactSliderScale(alignment: .top, lineLength: 6)
-            .compactSliderOptionsByAdding(.tapToSlide, .snapToSteps)
-            .compactSliderProgress { configuration in
-                Rectangle().fill(
-                    configuration.focusState.isFocused
-                        ? Color.accentColor : Color.accentColor.opacity(0.8)
-                )
+            .onContinuousHover { phase in
+                switch phase {
+                case .active:
+                    isLabelActive = true
+                case .ended:
+                    isLabelActive = false
+                }
             }
-            .scaleEffect(x: reversed ? -1 : 1, y: 1)
-            .clipShape(borderShape)
-            .contentShape([.interaction, .focusEffect], borderShape)
+        }
+        .frame(height: height)
+        .glassEffect(.regular, in: borderShape)
+        .overlay(
+            borderShape.strokeBorder(Color(nsColor: .separatorColor), lineWidth: 0.5)
+        )
+        .clipShape(borderShape)
     }
 }

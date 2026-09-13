@@ -9,6 +9,7 @@
 import Cocoa
 import Combine
 import Observation
+import SwiftUI
 
 /// A container for the items in the menu bar layout interface.
 final class LayoutBarContainer: NSView {

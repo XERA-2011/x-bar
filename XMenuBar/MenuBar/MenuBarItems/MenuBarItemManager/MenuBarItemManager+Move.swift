@@ -203,7 +203,7 @@ extension MenuBarItemManager {
     /// One absolute budget shared by admission, gate waiting, event transport,
     /// layout settling, and retries. Every nested wait receives only the time
     /// still available to the transaction.
-    nonisolated struct MoveTransactionBudget {
+    struct MoveTransactionBudget: Sendable {
         typealias Elapsed = @Sendable () -> Duration
         typealias Sleeper = @Sendable (Duration) async throws -> Void
 
@@ -251,6 +251,7 @@ extension MenuBarItemManager {
             return value
         }
 
+        @MainActor
         func run<Value>(
             maximum: Duration,
             repeating count: Int = 1,

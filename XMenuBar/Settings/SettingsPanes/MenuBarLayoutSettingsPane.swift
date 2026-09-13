@@ -254,9 +254,9 @@ struct MenuBarLayoutSettingsPane: View {
             title: "Live previews are off",
             message: "Without Screen Recording, menu bar items appear as their app's icon rather than a live preview. You can still arrange them.",
             systemImage: "info.circle.fill",
-            actionTitle: "Go to Advanced Settings"
+            actionTitle: "Go to General Settings"
         ) {
-            appState.navigationState.settingsNavigationIdentifier = .advanced
+            appState.navigationState.settingsNavigationIdentifier = .general
         }
     }
 }

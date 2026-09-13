@@ -33,10 +33,16 @@ struct AboutSettingsPane: View {
                     .padding(.vertical, 8)
             }
             IceSection("Updates") {
-                automaticallyCheckForUpdates
-                automaticallyDownloadUpdates
-                updateChannel
-                checkForUpdates
+                HStack {
+                    Text("Check for new releases on GitHub")
+                    Spacer()
+                    Button {
+                        updatesManager.checkForUpdates()
+                    } label: {
+                        Label("Check for Updates", systemImage: "arrow.clockwise")
+                    }
+                    .buttonStyle(.settingsGlass)
+                }
             }
         }
         .onChange(of: colorScheme, initial: true) {
@@ -176,55 +182,5 @@ struct AboutSettingsPane: View {
         NSWorkspace.shared.open(url)
     }
 
-    private var automaticallyCheckForUpdates: some View {
-        Toggle(
-            "Automatically check for updates",
-            isOn: $updatesManager.automaticallyChecksForUpdates
-        )
-    }
 
-    private var automaticallyDownloadUpdates: some View {
-        Toggle(
-            "Automatically download updates",
-            isOn: $updatesManager.automaticallyDownloadsUpdates
-        )
-    }
-
-    private var updateChannel: some View {
-        HStack {
-            Text("Update channel")
-            Spacer()
-            Picker("Update channel", selection: $updatesManager.updateChannel) {
-                ForEach(UpdateChannel.availableCases(on: ProcessInfo.processInfo.operatingSystemVersion)) { channel in
-                    Text(channel.localized).tag(channel)
-                }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            updateButton
-        }
-    }
-
-    private var updateButton: some View {
-        Button {
-            updatesManager.checkForUpdates()
-        } label: {
-            Label("Update", systemImage: "arrow.clockwise")
-        }
-        .buttonStyle(.settingsGlass)
-        .disabled(!updatesManager.canCheckForUpdates)
-        .accessibilityLabel("Check for Updates")
-    }
-
-    private var checkForUpdates: some View {
-        HStack {
-            Spacer()
-
-            Text("Last checked: \(updatesManager.lastUpdateCheckDate?.formatted(date: .abbreviated, time: .standard) ?? String(localized: "Never"))")
-                .font(.caption)
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-                .opacity(updatesManager.lastUpdateCheckDate == nil ? 0.75 : 1.0)
-        }
-    }
 }

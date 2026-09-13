@@ -929,24 +929,6 @@ final class ControlItem {
         searchItem.target = self
         menu.addItem(searchItem)
 
-        menu.addItem(.separator())
-
-        if appState.settings.triggers.featureFlags.showsAllOffInMenuBarMenu {
-            let allTriggerFeaturesOffItem = NSMenuItem(
-                title: String(localized: "All Trigger Features Off"),
-                action: #selector(disableAllTriggerFeatureFlags),
-                keyEquivalent: ""
-            )
-            allTriggerFeaturesOffItem.image = NSImage(
-                systemSymbolName: "power",
-                accessibilityDescription: "All Trigger Features Off"
-            )
-            allTriggerFeaturesOffItem.target = self
-            allTriggerFeaturesOffItem.isEnabled = appState.settings.triggers.featureFlags.hasEnabledFlags
-            menu.addItem(allTriggerFeaturesOffItem)
-
-            menu.addItem(.separator())
-        }
 
         // Add items to toggle the hidden and always-hidden sections.
         for name: MenuBarSection.Name in [.hidden, .alwaysHidden] {
@@ -991,38 +973,6 @@ final class ControlItem {
             item.target = self
             item.representedObject = section
             menu.addItem(item)
-        }
-
-        // Profiles submenu.
-        let profileManager = appState.profileManager
-        if !profileManager.profiles.isEmpty {
-            menu.addItem(.separator())
-
-            let profilesItem = NSMenuItem(
-                title: String(localized: "Profiles"),
-                action: nil,
-                keyEquivalent: ""
-            )
-            profilesItem.image = NSImage(
-                systemSymbolName: "person.crop.rectangle.stack",
-                accessibilityDescription: "Profiles"
-            )
-            let profilesMenu = NSMenu()
-            for meta in profileManager.profiles {
-                let item = NSMenuItem(
-                    title: meta.name,
-                    action: #selector(applyProfileFromMenu(_:)),
-                    keyEquivalent: ""
-                )
-                item.target = self
-                item.representedObject = meta.id
-                if meta.id == profileManager.activeProfileID {
-                    item.state = .on
-                }
-                profilesMenu.addItem(item)
-            }
-            profilesItem.submenu = profilesMenu
-            menu.addItem(profilesItem)
         }
 
         menu.addItem(.separator())
@@ -1091,31 +1041,9 @@ final class ControlItem {
         section.toggle()
     }
 
-    /// Disables every trigger feature flag.
-    @objc private func disableAllTriggerFeatureFlags() {
-        appState?.settings.triggers.featureFlags.disableAll()
-    }
-
     /// Opens the menu bar search panel.
     @objc private func showSearchPanel() {
         appState?.menuBarManager.searchPanel.show()
-    }
-
-    /// Applies the profile selected from the context menu.
-    @objc private func applyProfileFromMenu(_ menuItem: NSMenuItem) {
-        guard
-            let profileID = menuItem.representedObject as? UUID,
-            let appState,
-            appState.profileManager.layoutTask == nil,
-            profileID != appState.profileManager.activeProfileID
-        else { return }
-        let profileManager = appState.profileManager
-        Task {
-            guard let profile = try? profileManager.loadProfile(id: profileID) else { return }
-            let previousID = profileManager.activeProfileID
-            profileManager.activeProfileID = profileID
-            profileManager.applyProfile(profile, to: appState, previousProfileID: previousID)
-        }
     }
 
     /// Opens the settings window and checks for app updates.

@@ -8,30 +8,31 @@
 
 import SwiftUI
 
-private struct OnceAction {
+private final class OnceBox: @unchecked Sendable {
     private var action: (() -> Void)?
 
     init(action: @escaping () -> Void) {
         self.action = action
     }
 
-    mutating func callAsFunction() {
-        if let action = action.take() {
+    func run() {
+        if let action = action {
+            self.action = nil
             action()
         }
     }
 }
 
 private struct OnceModifier: ViewModifier {
-    @State private var action: OnceAction
+    private let box: OnceBox
 
     init(action: @escaping () -> Void) {
-        self.action = OnceAction(action: action)
+        self.box = OnceBox(action: action)
     }
 
     func body(content: Content) -> some View {
         content.onAppear {
-            action()
+            box.run()
         }
     }
 }
@@ -47,18 +48,17 @@ extension View {
 }
 
 private struct OnceScene<Content: Scene>: Scene {
-    @State private var action: OnceAction
-
+    private let box: OnceBox
     let content: Content
 
     init(content: Content, action: @escaping () -> Void) {
-        self.action = OnceAction(action: action)
+        self.box = OnceBox(action: action)
         self.content = content
     }
 
     var body: some Scene {
         content.onChange(of: 0, initial: true) {
-            action()
+            box.run()
         }
     }
 }

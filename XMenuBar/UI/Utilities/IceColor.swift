@@ -6,8 +6,29 @@
 //  Copyright (XMenuBar) © 2026 Toni Förster
 //  Licensed under the GNU GPLv3
 
+import AppKit
 import CoreGraphics
 import Foundation
+import SwiftUI
+
+extension NSColor {
+    static let defaultLayoutBar: NSColor = {
+        if let named = NSColor(named: "DefaultLayoutBarColor") {
+            return named
+        }
+        return NSColor(name: nil) { appearance in
+            if appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua {
+                return NSColor(displayP3Red: 1.0, green: 1.0, blue: 1.0, alpha: 0.07)
+            } else {
+                return NSColor(displayP3Red: 0.0, green: 0.0, blue: 0.0, alpha: 0.17)
+            }
+        }
+    }()
+}
+
+extension Color {
+    static let defaultLayoutBar = Color(nsColor: .defaultLayoutBar)
+}
 
 /// A custom color.
 nonisolated struct IceColor: Hashable {

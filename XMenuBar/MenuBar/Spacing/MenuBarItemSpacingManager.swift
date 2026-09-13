@@ -7,15 +7,6 @@
 //  Licensed under the GNU GPLv3
 
 import Cocoa
-import Subprocess
-// Prefer the `System` module when available: Subprocess's API surface uses
-// `System.FilePath`, so both sides must resolve to the same module or the
-// types won't unify.
-#if canImport(System)
-    import System
-#else
-    import SystemPackage
-#endif
 
 /// Manager for menu bar item spacing.
 @MainActor
@@ -110,37 +101,28 @@ final class MenuBarItemSpacingManager {
         executable executableURL: URL,
         with arguments: [String]
     ) async throws {
-        let result: ExecutionResult<Void, DiscardedOutput, StringOutput<UTF8>>
-        do {
-            // Executed by absolute path, with no argv[0] prepended.
-            //
-            // This used to run /usr/bin/env with "defaults" as its first
-            // argument, so the tool that ended up writing to the global
-            // domain was whatever `defaults` the inherited PATH resolved to.
-            // `command` is now only used to describe the invocation in logs
-            // and errors; every executable comes from Info.plist.
-            result = try await Subprocess.run(
-                .path(FilePath(executableURL.path)),
-                arguments: Arguments(arguments),
-                output: .discarded,
-                error: .string(limit: Self.errorByteLimit)
-            )
-        } catch {
-            throw MenuBarItemSpacingError(
-                kind: .processRun(error),
-                command: command,
-                arguments: arguments
-            )
+        let (exitStatus, stderr): (Int32, String) = try await withCheckedThrowingContinuation { continuation in
+            let process = Process()
+            process.executableURL = executableURL
+            process.arguments = arguments
+            let errPipe = Pipe()
+            process.standardError = errPipe
+            process.terminationHandler = { proc in
+                let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
+                let errString = String(data: errData, encoding: .utf8) ?? ""
+                continuation.resume(returning: (proc.terminationStatus, errString))
+            }
+            do {
+                try process.run()
+            } catch {
+                continuation.resume(throwing: error)
+            }
         }
 
-        guard result.terminationStatus.isSuccess else {
-            let exitStatus: Int32 = switch result.terminationStatus {
-            case let .exited(code): code
-            case let .signaled(code): code
-            }
-            let stderr = result.standardError.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard exitStatus == 0 else {
+            let trimmedStderr = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
             MenuBarItemSpacingManager.diagLog.error(
-                "\(command) \(arguments.joined(separator: " ")) exited with status \(exitStatus): \(stderr)"
+                "\(command) \(arguments.joined(separator: " ")) exited with status \(exitStatus): \(trimmedStderr)"
             )
             throw MenuBarItemSpacingError(
                 kind: .nonZeroExitStatus(exitStatus),

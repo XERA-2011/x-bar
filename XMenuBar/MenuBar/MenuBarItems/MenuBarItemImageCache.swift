@@ -731,11 +731,6 @@ final class MenuBarItemImageCache: @unchecked Sendable {
         switch nav.settingsNavigationIdentifier {
         case .menuBarLayout:
             return true
-        case .hotkeys:
-            // Only the expanded per-item hotkey list consumes item icons. Read
-            // from the snapshot so this stays race-free when called off the main
-            // actor (e.g. from refreshVisibleConsumersOrPrewarmLayoutCache).
-            return nav.isItemHotkeyListExpanded
         default:
             return false
         }
@@ -841,11 +836,7 @@ final class MenuBarItemImageCache: @unchecked Sendable {
             var sections: [MenuBarSection.Name]
             let isLayoutPane = nav.isSettingsPresented
                 && nav.settingsNavigationIdentifier == .menuBarLayout
-            // The Hotkeys pane only needs item icons while its per-item list
-            // disclosure is expanded.
-            let isHotkeyListVisible = nav.isSettingsPresented
-                && nav.settingsNavigationIdentifier == .hotkeys
-                && isItemHotkeyListExpanded
+            let isHotkeyListVisible = false
             if nav.isSearchPresented || isLayoutPane || isHotkeyListVisible {
                 if nav.isSearchPresented, !isLayoutPane, !isHotkeyListVisible {
                     // Search is the only consumer here that can be told to
@@ -1719,10 +1710,9 @@ final class MenuBarItemImageCache: @unchecked Sendable {
     /// Updates the access order for a given tag to mark it as most recently used.
     private func updateAccessOrder(for tag: MenuBarItemTag) {
         if accessOrder.contains(tag) {
-            accessOrder.move(members: CollectionOfOne(tag), to: accessOrder.endIndex)
-        } else {
-            accessOrder.append(tag)
+            accessOrder.remove(tag)
         }
+        accessOrder.append(tag)
     }
 
     /// Gets an image from the cache and updates its access order.

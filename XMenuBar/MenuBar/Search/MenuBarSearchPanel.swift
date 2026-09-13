@@ -10,8 +10,15 @@ import Combine
 import Ifrit
 import SwiftUI
 
+private struct MenuBarSearchPanelKey: EnvironmentKey {
+    static let defaultValue: MenuBarSearchPanel? = nil
+}
+
 extension EnvironmentValues {
-    @Entry var menuBarSearchPanel: MenuBarSearchPanel?
+    var menuBarSearchPanel: MenuBarSearchPanel? {
+        get { self[MenuBarSearchPanelKey.self] }
+        set { self[MenuBarSearchPanelKey.self] = newValue }
+    }
 }
 
 /// A panel that contains the menu bar search interface.
@@ -571,7 +578,7 @@ private struct MenuBarSearchContentView: View {
 
     private func openPermissionsSettings() {
         closePanel()
-        appState.navigationState.settingsNavigationIdentifier = .advanced
+        appState.navigationState.settingsNavigationIdentifier = .general
         appState.activate(withPolicy: .regular)
         appState.openWindow(.settings)
     }
@@ -852,7 +859,7 @@ private struct SettingsButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(.iceCubeStroke)
+            Image(systemName: "gearshape")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .foregroundStyle(.secondary)

@@ -224,9 +224,6 @@ nonisolated extension Defaults {
 
         static let alwaysUseAppIconForMenuBarItems = false
 
-        // MARK: Appearance Settings
-
-        static let menuBarAppearanceConfigurationV2 = MenuBarAppearanceConfigurationV2.defaultConfiguration
 
         // MARK: Display Settings
 
@@ -380,10 +377,6 @@ nonisolated extension Defaults {
         /// heuristic, and a wrong verdict is a wrong move.
         case surfaceItemsSeekingAttention = "SurfaceItemsSeekingAttention"
 
-        // MARK: Appearance Settings
-
-        case menuBarAppearanceConfigurationV2 = "MenuBarAppearanceConfigurationV2"
-        case menuBarAppearanceSpaceOverrides = "MenuBarAppearanceSpaceOverrides"
         case lastSettingsPane = "LastSettingsPane"
 
         // MARK: Migration
@@ -408,23 +401,6 @@ nonisolated extension Defaults {
         case settingsURIWhitelist = "SettingsURIWhitelist"
         case settingsURISigningIdentities = "SettingsURISigningIdentities"
 
-        // MARK: Profile Hooks
-
-        case globalPreProfileHook = "GlobalPreProfileHook"
-        case globalPostProfileHook = "GlobalPostProfileHook"
-
-        // MARK: Menu Bar Item Triggers
-
-        case menuBarItemTriggers = "MenuBarItemTriggers"
-        case triggerFeatureFlags = "TriggerFeatureFlags"
-        case showTriggerFeatureFlagsAllOffMenuItem = "ShowTriggerFeatureFlagsAllOffMenuItem"
-
-        // MARK: Focus Filter
-
-        /// Profile ID requested by the most recent Focus Filter
-        /// activation. Written by ``XMenuBarFocusFilter`` and consumed by
-        /// ``ProfileManager/applyFocusFilterProfile()``.
-        case focusFilterRequestedProfileID = "FocusFilterRequestedProfileID"
 
         // MARK: Hidden Diagnostic Flags
 

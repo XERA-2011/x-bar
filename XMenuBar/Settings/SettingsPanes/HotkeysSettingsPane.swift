@@ -26,13 +26,6 @@ struct HotkeysSettingsPane: View {
                     imageCache: appState.imageCache
                 )
             }
-            if !appState.profileManager.profiles.isEmpty {
-                IceSection("Profiles") {
-                    ForEach(appState.profileManager.profiles) { meta in
-                        profileHotkeyRecorder(for: meta)
-                    }
-                }
-            }
             IceSection("Other") {
                 hotkeyRecorder(forAction: .enableIceBar)
                 hotkeyRecorder(forAction: .toggleApplicationMenus)
@@ -61,20 +54,9 @@ struct HotkeysSettingsPane: View {
                     Text("Toggle automatic rehiding")
                 case .toggleZenMode:
                     Text("Toggle zen mode")
-                case .profileApply:
-                    EmptyView()
                 case .openMenuBarItem:
                     EmptyView()
                 }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func profileHotkeyRecorder(for meta: ProfileMetadata) -> some View {
-        if let hotkey = appState.profileManager.profileHotkeys[meta.id] {
-            HotkeyRecorder(hotkey: hotkey) {
-                Text(meta.name)
             }
         }
     }

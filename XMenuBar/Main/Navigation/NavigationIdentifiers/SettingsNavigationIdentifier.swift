@@ -10,49 +10,22 @@ import SwiftUI
 
 /// The navigation identifier type for the "Settings" interface.
 nonisolated enum SettingsNavigationIdentifier: String, NavigationIdentifier {
-    case general = "General"
-    case displays = "Displays"
     case menuBarLayout = "Menu Bar Layout"
-    case menuBarAppearance = "Menu Bar Appearance"
-    case hotkeys = "Hotkeys"
-    case profiles = "Profiles"
-    case advanced = "Advanced"
-    case automation = "Automation"
-    case triggers = "Triggers"
-    case tools = "Tools"
-    case developer = "Developer"
+    case general = "General"
     case about = "About"
 
     var localized: LocalizedStringKey {
         switch self {
-        case .general: "General"
-        case .displays: "Displays"
         case .menuBarLayout: "Layout"
-        case .menuBarAppearance: "Appearance"
-        case .hotkeys: "Hotkeys"
-        case .profiles: "Profiles"
-        case .advanced: "Advanced"
-        case .automation: "Automation"
-        case .triggers: "Triggers"
-        case .tools: "Tools"
-        case .developer: "Dev Mode Flags"
+        case .general: "General"
         case .about: "About"
         }
     }
 
     var iconResource: IconResource {
         switch self {
-        case .general: .systemSymbol("gearshape")
-        case .displays: .systemSymbol("display.2")
         case .menuBarLayout: .systemSymbol("rectangle.topthird.inset.filled")
-        case .menuBarAppearance: .systemSymbol("swatchpalette")
-        case .hotkeys: .systemSymbol("keyboard")
-        case .profiles: .systemSymbol("person.crop.rectangle.stack")
-        case .advanced: .systemSymbol("gearshape.2")
-        case .automation: .systemSymbol("app.badge.checkmark")
-        case .triggers: .systemSymbol("bolt.badge.automatic")
-        case .tools: .systemSymbol("wrench.and.screwdriver")
-        case .developer: .systemSymbol("hammer")
+        case .general: .systemSymbol("gearshape")
         case .about: .systemSymbol("cube")
         }
     }

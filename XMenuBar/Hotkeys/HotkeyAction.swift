@@ -20,16 +20,13 @@ nonisolated enum HotkeyAction: String, Codable, CaseIterable {
     case toggleAutoRehide = "ToggleAutoRehide"
     case toggleZenMode = "ToggleZenMode"
 
-    /// Used by profile hotkeys, action is handled externally.
-    case profileApply = "ProfileApply"
-
     /// Used by per-item hotkeys, action is handled externally.
     case openMenuBarItem = "OpenMenuBarItem"
 
     /// Actions that should appear in the Hotkeys settings pane as fixed,
-    /// singleton recorders. Dynamic per-profile and per-item hotkeys are
-    /// created separately and are excluded here.
+    /// singleton recorders. Dynamic per-item hotkeys are created separately
+    /// and are excluded here.
     static var settingsActions: [HotkeyAction] {
-        allCases.filter { $0 != .profileApply && $0 != .openMenuBarItem }
+        allCases.filter { $0 != .openMenuBarItem }
     }
 }

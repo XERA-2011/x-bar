@@ -91,21 +91,7 @@ extension Hotkey {
                 guard let hotkey, let appState else {
                     return
                 }
-                if hotkey.action == .profileApply {
-                    guard appState.profileManager.layoutTask == nil else { return }
-                    let key = ObjectIdentifier(hotkey)
-                    if let profileID = appState.profileManager.hotkeyProfileMap[key],
-                       profileID != appState.profileManager.activeProfileID
-                    {
-                        let profileManager = appState.profileManager
-                        Task {
-                            guard let profile = try? profileManager.loadProfile(id: profileID) else { return }
-                            let previousID = profileManager.activeProfileID
-                            profileManager.activeProfileID = profileID
-                            profileManager.applyProfile(profile, to: appState, previousProfileID: previousID)
-                        }
-                    }
-                } else if hotkey.action == .openMenuBarItem {
+                if hotkey.action == .openMenuBarItem {
                     let key = ObjectIdentifier(hotkey)
                     if let identifier = appState.menuBarManager.hotkeyItemMap[key] {
                         appState.menuBarManager.openItem(withIdentifier: identifier)

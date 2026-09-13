@@ -7,6 +7,7 @@
 //  Licensed under the GNU GPLv3
 
 import Algorithms
+import AXSwift6
 import Cocoa
 
 // MARK: - Item Cache

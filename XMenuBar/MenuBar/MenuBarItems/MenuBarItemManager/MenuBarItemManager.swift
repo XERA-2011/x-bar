@@ -2037,22 +2037,6 @@ final class MenuBarItemManager {
             // layout. Without this, the cache cycle below would fire
             // applySavedLayout which restores whatever the live
             // savedSectionOrder happens to be, which can diverge
-            // from the profile spec across restarts (manual drags,
-            // unmanaged items inserted by NewItemsPlacement, etc.).
-            // Awaiting layoutTask ensures the profile apply runs to
-            // completion (including arming isApplyingProfileLayout)
-            // before the cache cycles below trigger applySavedLayout;
-            // that gate then keeps savedOrder from racing the
-            // profile apply on launch.
-            if let appState = self.appState,
-               appState.profileManager.activeProfileID != nil
-            {
-                MenuBarItemManager.diagLog.info(
-                    "\(reason): applying active display profile after settling"
-                )
-                appState.profileManager.reapplyActiveProfile()
-                await appState.profileManager.layoutTask?.value
-            }
 
             MenuBarItemManager.diagLog.debug(
                 "\(reason): running fast restore without sourcePID resolution"

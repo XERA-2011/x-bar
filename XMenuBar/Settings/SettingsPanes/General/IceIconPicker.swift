@@ -7,6 +7,7 @@
 //  Licensed under the GNU GPLv3
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// The menu bar icon picker, including the custom-image importer and the
 /// template-rendering toggle that only applies to a custom icon.

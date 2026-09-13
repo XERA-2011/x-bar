@@ -372,13 +372,8 @@ private struct IceBarContentView: View {
     }
 
     /// The shape, tint and border to draw with, which is the menu bar's
-    /// unless the XMenuBar Bar has been given its own.
-    private var appearance: ResolvedXMenuBarBarAppearance {
-        configuration.resolvedXMenuBarBarAppearance
-    }
-
-    private var configuration: MenuBarAppearanceConfigurationV2 {
-        appState.appearanceManager.configuration
+    private var hasRoundedShape: Bool {
+        true
     }
 
     private var displaySettings: DisplaySettingsManager {
@@ -403,15 +398,11 @@ private struct IceBarContentView: View {
     }
 
     private var verticalPadding: CGFloat {
-        screen.hasNotch && appearance.hasRoundedShape ? 2 : 0
+        screen.hasNotch ? 2 : 0
     }
 
     private var contentHeight: CGFloat {
-        let menuBarHeight = screen.getMenuBarHeightEstimate()
-        if configuration.shapeKind != .noShape, configuration.isInset, screen.hasNotch {
-            return menuBarHeight - appState.appearanceManager.menuBarInsetAmount * 2
-        }
-        return menuBarHeight
+        screen.getMenuBarHeightEstimate()
     }
 
     private var itemMaxHeight: CGFloat? {
@@ -485,7 +476,7 @@ private struct IceBarContentView: View {
     private var clipShape: some InsettableShape {
         XMenuBarBarBorderShape.xmenubarBarClip(
             height: contentHeight,
-            hasRoundedShape: appearance.hasRoundedShape
+            hasRoundedShape: hasRoundedShape
         )
     }
 
@@ -503,24 +494,12 @@ private struct IceBarContentView: View {
             .menuBarItemContainer(
                 appState: appState,
                 colorInfo: colorManager.colorInfo,
-                tintOverride: MenuBarContainerTint(
-                    kind: appearance.tintKind,
-                    color: appearance.tintColor,
-                    gradient: appearance.tintGradient,
-                    opacity: appearance.tintOpacity
-                )
+                screen: screen
             )
             .foregroundStyle(colorManager.colorInfo?.isBright(for: screen) == true ? .black : .white)
             .clipShape(clipShape)
-
-            if appearance.hasBorder {
-                XMenuBarBarBorderShape.xmenubarBarBorder(
-                    height: contentHeight,
-                    hasRoundedShape: appearance.hasRoundedShape,
-                    borderWidth: appearance.borderWidth
-                )
-                .stroke(lineWidth: appearance.borderWidth)
-                .foregroundStyle(Color(cgColor: appearance.borderColor))
+            .overlay {
+                clipShape.stroke(Color.primary.opacity(0.12), lineWidth: 0.5)
             }
         }
         .padding(5)
@@ -556,7 +535,7 @@ private struct IceBarContentView: View {
     /// Opens the permissions settings pane, hiding the current section first.
     private func openPermissionsSettings() {
         menuBarManager.section(withName: section)?.hide()
-        appState.navigationState.settingsNavigationIdentifier = .advanced
+        appState.navigationState.settingsNavigationIdentifier = .general
         appState.activate(withPolicy: .regular)
         appState.openWindow(.settings)
     }
@@ -624,7 +603,7 @@ private struct IceBarContentView: View {
                                 section: section,
                                 displayID: screen.displayID,
                                 maxHeight: itemMaxHeight,
-                                hasRoundedShape: appearance.hasRoundedShape,
+                                hasRoundedShape: hasRoundedShape,
                                 tooltipDelay: appState.settings.advanced.tooltipDelay,
                                 isLightBackground: isLightBackground,
                                 prefersAppIcon: prefersAppIcon
@@ -652,7 +631,7 @@ private struct IceBarContentView: View {
                                 section: section,
                                 displayID: screen.displayID,
                                 maxHeight: itemMaxHeight,
-                                hasRoundedShape: appearance.hasRoundedShape,
+                                hasRoundedShape: hasRoundedShape,
                                 tooltipDelay: appState.settings.advanced.tooltipDelay,
                                 isLightBackground: isLightBackground,
                                 prefersAppIcon: prefersAppIcon
@@ -680,7 +659,7 @@ private struct IceBarContentView: View {
                                         section: section,
                                         displayID: screen.displayID,
                                         maxHeight: itemMaxHeight,
-                                        hasRoundedShape: appearance.hasRoundedShape,
+                                        hasRoundedShape: hasRoundedShape,
                                         tooltipDelay: appState.settings.advanced.tooltipDelay,
                                         isLightBackground: isLightBackground,
                                         prefersAppIcon: prefersAppIcon

@@ -7,15 +7,6 @@
 //  Licensed under the GNU GPLv3
 
 import Foundation
-import Subprocess
-// Prefer the `System` module when available: Subprocess's API surface uses
-// `System.FilePath`, so both sides must resolve to the same module or the
-// types won't unify.
-#if canImport(System)
-    import System
-#else
-    import SystemPackage
-#endif
 
 /// Destructive troubleshooting helpers used by Settings → Tools.
 ///
@@ -158,21 +149,35 @@ nonisolated enum MaintenanceTools {
 
     @concurrent
     private static func run(path: String, arguments: [String]) async throws {
-        let result = try await Subprocess.run(
-            .path(FilePath(path)),
-            arguments: Arguments(arguments),
-            output: .string(limit: 64 * 1024),
-            error: .string(limit: 64 * 1024)
-        )
-        let exitStatus: Int32 = switch result.terminationStatus {
-        case let .exited(code): code
-        case let .signaled(code): code
-        }
-        guard result.terminationStatus.isSuccess else {
-            let detail = [result.standardOutput, result.standardError]
-                .compactMap(\.self)
-                .joined(separator: "\n")
-            throw ToolError.commandFailed(URL(fileURLWithPath: path).lastPathComponent, exitStatus, detail)
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: path)
+            process.arguments = arguments
+            let outPipe = Pipe()
+            let errPipe = Pipe()
+            process.standardOutput = outPipe
+            process.standardError = errPipe
+            process.terminationHandler = { proc in
+                if proc.terminationStatus == 0 {
+                    continuation.resume()
+                } else {
+                    let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
+                    let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
+                    let stderr = String(data: errData, encoding: .utf8) ?? ""
+                    let stdout = String(data: outData, encoding: .utf8) ?? ""
+                    let detail = [stdout, stderr].filter { !$0.isEmpty }.joined(separator: "\n")
+                    continuation.resume(throwing: ToolError.commandFailed(
+                        URL(fileURLWithPath: path).lastPathComponent,
+                        proc.terminationStatus,
+                        detail
+                    ))
+                }
+            }
+            do {
+                try process.run()
+            } catch {
+                continuation.resume(throwing: error)
+            }
         }
     }
 }

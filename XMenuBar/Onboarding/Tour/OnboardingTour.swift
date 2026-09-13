@@ -33,9 +33,6 @@ struct XMenuBarOnboardingTour: View {
 
     @State private var welcomeModel = XMenuBarWelcomeModel()
     @State private var managementModel = XMenuBarManagementMockupModel()
-    @State private var appearanceModel = XMenuBarAppearanceMockupModel()
-    @State private var hotkeysModel = XMenuBarHotkeysMockupModel()
-    @State private var profilesModel = XMenuBarProfilesMockupModel()
 
     private let slides = XMenuBarTourSlide.allCases
     /// The welcome slide (index 0) plays once and is never looped back to;
@@ -61,12 +58,6 @@ struct XMenuBarOnboardingTour: View {
                         XMenuBarWelcomeMockup(model: welcomeModel)
                     case .menuBarManagement:
                         ManagementSlideMockup(model: managementModel, onInteraction: resetAutoAdvanceTimer)
-                    case .menuBarAppearance:
-                        AppearanceSlideMockup(model: appearanceModel, onInteraction: resetAutoAdvanceTimer)
-                    case .hotkeysAutomation:
-                        HotkeysSlideMockup(model: hotkeysModel, onInteraction: resetAutoAdvanceTimer)
-                    case .profiles:
-                        ProfilesSlideMockup(model: profilesModel, onInteraction: resetAutoAdvanceTimer)
                     }
                 }
                 .frame(height: 272)
@@ -178,9 +169,6 @@ struct XMenuBarOnboardingTour: View {
         switch current {
         case .welcome: welcomeModel.restart()
         case .menuBarManagement: managementModel.restart()
-        case .menuBarAppearance: appearanceModel.restart()
-        case .hotkeysAutomation: hotkeysModel.restart()
-        case .profiles: profilesModel.restart()
         }
         scheduleAutoAdvance()
     }

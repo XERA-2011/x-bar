@@ -6,6 +6,7 @@
 //  Copyright (XMenuBar) © 2026 Toni Förster
 //  Licensed under the GNU GPLv3
 
+import Algorithms
 import Cocoa
 
 // @preconcurrency: see the note in MenuBarItemManager.swift.

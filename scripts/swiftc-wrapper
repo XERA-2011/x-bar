@@ -1,0 +1,17 @@
+#!/bin/bash
+REAL_SWIFTC="/Library/Developer/CommandLineTools/usr/bin/swiftc"
+ALIAS_FILE="/Users/xera/GitHub/x-menubar/scripts/manifest_aliases.txt"
+
+is_manifest=0
+for arg in "$@"; do
+    if [[ "$arg" == *"-package-description-version"* ]] || [[ "$arg" == *"ManifestAPI"* ]]; then
+        is_manifest=1
+        break
+    fi
+done
+
+if [ $is_manifest -eq 1 ]; then
+    exec "$REAL_SWIFTC" "$@" -Xlinker -alias_list -Xlinker "$ALIAS_FILE"
+else
+    exec "$REAL_SWIFTC" "$@"
+fi

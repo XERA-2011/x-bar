@@ -8,21 +8,17 @@
 
 import SwiftUI
 
-struct IceForm<Content: View>: View {
-    @State private var formWidth: CGFloat = 0
+struct IceForm: View {
+    @State private var formWidth: CGFloat
 
-    private let content: Content
+    private let content: AnyView
 
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
+    init<Content: View>(@ViewBuilder content: () -> Content) {
+        self._formWidth = State(initialValue: 0)
+        self.content = AnyView(content())
     }
 
     var body: some View {
-        // The pane title lives in the window's toolbar (navigationTitle);
-        // rendering it here too produced a double header. Form scrolls
-        // full-width so the scrollbar tracks the detail pane / window edge;
-        // reading width is enforced with symmetric gutters instead of
-        // shrinking the scroll view itself.
         Form {
             content
         }
@@ -38,8 +34,6 @@ struct IceForm<Content: View>: View {
         .accessibilityElement(children: .contain)
     }
 
-    /// Extra inset so grouped cards stay near ``SettingsDetailLayout/columnMaxWidth``
-    /// on wide windows without pinning the scrollbar to that column.
     private var readingGutter: CGFloat {
         let available = formWidth - (SettingsDetailLayout.titleHorizontalInset * 2)
         let overflow = available - SettingsDetailLayout.columnMaxWidth
