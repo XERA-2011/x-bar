@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.xera.xmenubar</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>xmenubar</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>XMenuBar reads your paired Bluetooth devices so a menu bar item trigger can show or hide an item while a chosen device is connected.</string>
+	<key>NSFocusStatusUsageDescription</key>
+	<string>XMenuBar reads whether a Focus is active so menu bar item triggers can respond to Focus changes.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>XMenuBar uses your location while its settings are open to identify the current Wi-Fi network and configure location-based menu bar item triggers.</string>
+	<key>SUFeedURL</key>
+	<string>https://xmenubar-app.github.io/updates/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>fQ2kWqCLfAPAxQX1rp8gVNoG9hlAV/Gmm7kMBbxFe+A=</string>
+	<key>XMenuBarDonateURL</key>
+	<string>https://github.com/sponsors/stonerl</string>
+	<key>XMenuBarMenuBarItemSpacingExecutableURI</key>
+	<string>file:///usr/bin/defaults</string>
+	<key>XMenuBarLaunchctlExecutableURI</key>
+	<string>file:///bin/launchctl</string>
+	<key>XMenuBarRepositoryURL</key>
+	<string>https://github.com/XERA-2011/x-menubar</string>
+	<key>XMenuBarSkyLightFrameworkPath</key>
+	<string>/System/Library/PrivateFrameworks/SkyLight.framework/SkyLight</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.xera.xmenubar.trigger-priority</string>
+			<key>UTTypeDescription</key>
+			<string>XMenuBar Trigger Priority</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict/>
+		</dict>
+	</array>
+</dict>
+</plist>

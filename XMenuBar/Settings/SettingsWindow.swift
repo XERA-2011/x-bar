@@ -1,0 +1,50 @@
+//
+//  SettingsWindow.swift
+//  Project: XMenuBar
+//
+//  Copyright (Ice) © 2023–2025 Jordan Baird
+//  Copyright (XMenuBar) © 2026 Toni Förster
+//  Licensed under the GNU GPLv3
+
+import SwiftUI
+
+// MARK: - SettingsWindow
+
+struct SettingsWindow: Scene {
+    @Bindable var appState: AppState
+
+    var body: some Scene {
+        IceWindow(id: .settings) {
+            SettingsView(appState: appState, navigationState: appState.navigationState)
+                .sheet(isPresented: $appState.isUpdateConsentPresented) {
+                    UpdateConsentSheet { autoDownload in
+                        appState.isUpdateConsentPresented = false
+                        Defaults.set(true, forKey: .hasSeenUpdateConsent)
+                        appState.updatesManager.automaticallyChecksForUpdates = true
+                        appState.updatesManager.automaticallyDownloadsUpdates = autoDownload
+                        appState.startUpdaterIfNeeded()
+                        appState.presentOnboardingIfNeeded()
+                    } onDisable: {
+                        appState.isUpdateConsentPresented = false
+                        Defaults.set(true, forKey: .hasSeenUpdateConsent)
+                        appState.updatesManager.automaticallyChecksForUpdates = false
+                        appState.presentOnboardingIfNeeded()
+                    }
+                }
+                .sheet(isPresented: $appState.isOnboardingPresented) {
+                    XMenuBarOnboardingView {
+                        Defaults.set(true, forKey: .hasSeenOnboarding)
+                        appState.isOnboardingPresented = false
+                    }
+                    .environment(appState.permissions)
+                    .frame(width: XMenuBarOnboardingWindowMetrics.width, height: XMenuBarOnboardingWindowMetrics.height)
+                }
+                .frame(minWidth: 850, minHeight: 600)
+        }
+        .windowResizability(.contentSize)
+        .defaultSize(width: 950, height: 650)
+        .windowStyle(.titleBar)
+        .windowToolbarStyle(.unified)
+        .environment(appState)
+    }
+}

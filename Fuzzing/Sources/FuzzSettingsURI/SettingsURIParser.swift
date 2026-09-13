@@ -1,0 +1,1 @@
+../../../XMenuBar/Utilities/SettingsURIParser.swift
