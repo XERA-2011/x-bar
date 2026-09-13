@@ -53,8 +53,6 @@ cat << 'EOF' > "${CONTENTS}/Info.plist"
 	<string>XMenuBar</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
-	<key>CFBundleIconName</key>
-	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.xera.xmenubar</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -101,9 +99,7 @@ EOF
 # Copy Documentation & Assets
 cp -p "${ROOT_DIR}/XMenuBar/Resources/Acknowledgements.md" "${RESOURCES}/"
 cp -p "${ROOT_DIR}/XMenuBar/Resources/Localizable.xcstrings" "${RESOURCES}/"
-if [[ -d "${ROOT_DIR}/XMenuBar/Resources/AppIcon.icon" ]]; then
-    cp -R "${ROOT_DIR}/XMenuBar/Resources/AppIcon.icon" "${RESOURCES}/"
-fi
+
 
 # Copy all png assets directly into Resources for NSImage(named:) lookup
 while IFS= read -r png; do
