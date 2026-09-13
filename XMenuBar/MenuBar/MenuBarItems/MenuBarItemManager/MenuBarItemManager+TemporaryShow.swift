@@ -621,7 +621,15 @@ extension MenuBarItemManager {
             return .showFailed
         }
 
-        let moveDestination: MoveDestination = .leftOfItem(anchor)
+        let screen = NSScreen.screens.first { $0.displayID == resolvedDisplayID } ?? NSScreen.main
+        let notchMaxX = screen?.frameOfNotch.map { $0.maxX + 4 } ?? (screen?.visibleFrame.minX ?? 0)
+        let wouldLandInNotchOrOffscreen = (anchor.bounds.minX - 1) <= notchMaxX
+
+        let moveDestination: MoveDestination = if wouldLandInNotchOrOffscreen {
+            .rightOfItem(anchor)
+        } else {
+            .leftOfItem(anchor)
+        }
 
         // Record the item's original section early so we can relocate it if its app
         // quits before we get a chance to rehide it (macOS persists the

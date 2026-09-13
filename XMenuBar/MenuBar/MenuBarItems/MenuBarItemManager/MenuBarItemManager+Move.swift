@@ -176,10 +176,7 @@ extension MenuBarItemManager {
         controlDividerX: CGFloat?
     ) -> MoveEndpointDisposition {
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
-        if isOnScreen {
-            guard let physicalDisplay = displays.first(where: { $0.bounds.contains(center) }) else {
-                return .invalid
-            }
+        if isOnScreen, let physicalDisplay = displays.first(where: { $0.bounds.contains(center) }) {
             return physicalDisplay.id == selectedDisplayID
                 ? .selectedDisplay
                 : .otherDisplay(physicalDisplay.id)
