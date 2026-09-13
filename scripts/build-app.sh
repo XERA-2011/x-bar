@@ -106,7 +106,12 @@ if [[ -d "${ROOT_DIR}/XMenuBar/Resources/AppIcon.icon" ]]; then
 fi
 
 # Copy all png assets directly into Resources for NSImage(named:) lookup
-find "${ROOT_DIR}/XMenuBar/Resources/Assets.xcassets" -name "*.png" -exec cp -p {} "${RESOURCES}/" \;
+while IFS= read -r png; do
+    filename="$(basename "$png")"
+    name="${filename%.*}"
+    cp -p "$png" "${RESOURCES}/${filename}"
+    cp -p "$png" "${RESOURCES}/${name}@2x.png"
+done < <(find "${ROOT_DIR}/XMenuBar/Resources/Assets.xcassets" -name "*.png")
 
 # Generate and copy AppIcon.icns
 if [[ -f "/tmp/AppIcon.icns" ]]; then

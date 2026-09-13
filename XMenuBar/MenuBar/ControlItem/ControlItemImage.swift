@@ -46,11 +46,14 @@ nonisolated enum ControlItemImage: Codable, Hashable {
             guard let originalImage = NSImage(named: name) else {
                 return nil
             }
+            originalImage.isTemplate = true
             let originalWidth = originalImage.size.width
             let originalHeight = originalImage.size.height
             let ratio = max(originalWidth / 25, originalHeight / 17)
             let newSize = CGSize(width: originalWidth / ratio, height: originalHeight / ratio)
-            return originalImage.resized(to: newSize)
+            let resizedImage = originalImage.resized(to: newSize)
+            resizedImage.isTemplate = true
+            return resizedImage
         case let .data(data):
             let image = NSImage(data: data)
             image?.isTemplate = customIceIconIsTemplate
