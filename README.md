@@ -1,4 +1,4 @@
-# XMenuBar
+# xBar
 
 <p align="center">
   <b>轻量、纯粹、优雅的 macOS 菜单栏管理工具</b><br />
@@ -29,20 +29,20 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/XERA-2011/x-menubar.git
-cd x-menubar
+git clone https://github.com/XERA-2011/x-bar.git
+cd x-bar
 
 # 编译并打包 Release 版本
 ./scripts/build-app.sh release
 ```
 
-构建完成后，打包出的独立应用位于 `dist/XMenuBar.app`，直接拖入 `/Applications` 即可使用。
+构建完成后，打包出的独立应用位于 `dist/xBar.app`，直接拖入 `/Applications` 即可使用。
 
 ---
 
 ## 🙏 参考与致谢
 
-XMenuBar 的开发汲取了开源社区的智慧与灵感，特别感谢以下优秀项目：
+xBar 的开发汲取了开源社区的智慧与灵感，特别感谢以下优秀项目：
 
 - **[jordanbaird/Ice](https://github.com/jordanbaird/Ice)** — 强大的 macOS 菜单栏隐藏与外观定制先驱项目。
 - **[thaw-app/Thaw](https://github.com/thaw-app/Thaw)** — 现代化的开源菜单栏增强套件与设计实践。

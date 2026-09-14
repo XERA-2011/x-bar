@@ -1,10 +1,10 @@
 # Credits
 
-XMenuBar is translated by volunteers on [Crowdin](https://crowdin.com/project/xmenubar).
+xBar is translated by volunteers on [Crowdin](https://crowdin.com/project/xbar).
 Everyone below has contributed translated strings to the app.
 
 Want to join them, or spotted a translation that could be better?
-[Translate XMenuBar on Crowdin](https://crowdin.com/project/xmenubar). You can request
+[Translate xBar on Crowdin](https://crowdin.com/project/xbar). You can request
 new languages there too.
 
 ## Translators

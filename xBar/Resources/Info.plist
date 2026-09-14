@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.xera.xbar</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>xbar</string>
+				<string>xmenubar</string>
+			</array>
+		</dict>
+	</array>
+	<key>XBarDonateURL</key>
+	<string>https://github.com/XERA-2011/sponsor</string>
+	<key>XBarRepositoryURL</key>
+	<string>https://github.com/XERA-2011/x-bar</string>
+	<key>XBarSkyLightFrameworkPath</key>
+	<string>/System/Library/PrivateFrameworks/SkyLight.framework/SkyLight</string>
+	<key>XMenuBarDonateURL</key>
+	<string>https://github.com/XERA-2011/sponsor</string>
+	<key>XMenuBarRepositoryURL</key>
+	<string>https://github.com/XERA-2011/x-bar</string>
+	<key>XMenuBarSkyLightFrameworkPath</key>
+	<string>/System/Library/PrivateFrameworks/SkyLight.framework/SkyLight</string>
+</dict>
+</plist>

@@ -1,9 +1,9 @@
-# XMenuBar architecture
+# xBar architecture
 
-High-level design of the software produced by the XMenuBar project. This is a map
+High-level design of the software produced by the xBar project. This is a map
 of major components and trust boundaries, not an API reference.
 
-XMenuBar is a native **macOS menu bar manager** (Swift / AppKit / SwiftUI). It
+xBar is a native **macOS menu bar manager** (Swift / AppKit / SwiftUI). It
 hides and shows menu bar items, provides search and hotkeys, supports layout
 profiles, and customizes menu bar appearance. It is a maintained fork of
 [Ice](https://github.com/jordanbaird/Ice).
@@ -13,40 +13,40 @@ profiles, and customizes menu bar appearance. It is a maintained fork of
 - Keep the menu bar usable (hide clutter, reveal on demand) without surprising
   loss of status items.
 - Prefer local-only operation: no accounts, no telemetry/tracking backend.
-- Fail closed for privileged automation surfaces (`xmenubar://` settings APIs).
+- Fail closed for privileged automation surfaces (`xbar://` settings APIs).
 - Stay compatible with current macOS releases. The deployment target is macOS
   26; macOS 27 support is tracked in
-  [#687](https://github.com/XERA-2011/x-menubar/issues/687).
+  [#687](https://github.com/XERA-2011/x-bar/issues/687).
 
 ## Repository layout
 
 | Path | Role |
 | --- | --- |
-| `XMenuBar/` | Main application target (UI, menu bar logic, settings, events, permissions) |
+| `xBar/` | Main application target (UI, menu bar logic, settings, events, permissions) |
 | `Shared/` | Code shared between the app and helper processes (bridging, XPC client types, utilities) |
 | `MenuBarItemService/` | XPC helper process that resolves menu bar item source PIDs off the main app |
 | `MenuBarCaptureService/` | Recyclable XPC helper that runs SkyLight offscreen icon capture so the per-call dictionary leak stays out of the UI process |
-| `XMenuBarCtl/` | Small SwiftPM CLI / control utilities |
-| `XMenuBarTests/` | Swift Testing suite run in CI |
-| `Fuzzing/` | SwiftPM libFuzzer targets; currently the `xmenubar://` settings URI parser |
+| `xBarCtl/` | Small SwiftPM CLI / control utilities |
+| `xBarTests/` | Swift Testing suite run in CI |
+| `Fuzzing/` | SwiftPM libFuzzer targets; currently the `xbar://` settings URI parser |
 | `scripts/` | Coverage, credits, and SwiftLint input helpers used by CI |
 | `docs/` | User/developer documentation (e.g. URI schemes) |
 | `.github/` | CI, release, contributing, security policy |
 
 External dependencies are declared via Swift Package Manager and locked in
-`XMenuBar.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`
+`xBar.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`
 (e.g. Sparkle, AXSwift, CompactSlider, Ifrit, LaunchAtLogin-Modern).
 
 ## Runtime components
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│                           XMenuBar.app                          │
+│                           xBar.app                          │
 │  AppDelegate / AppState                                     │
-│  ├── MenuBar (ItemManager, layout, IceBar/XMenuBar Bar, …)      │
+│  ├── MenuBar (ItemManager, layout, IceBar/xBar, …)      │
 │  ├── Events / Hotkeys / HID                                 │
 │  ├── Triggers (condition monitors)                          │
-│  ├── Settings + URI handler (xmenubar://)                       │
+│  ├── Settings + URI handler (xbar://)                       │
 │  ├── Permissions (Accessibility, Screen Recording, …)       │
 │  └── Updates (Sparkle)                                      │
 │              │ XPC                    │ XPC                 │
@@ -61,11 +61,11 @@ External dependencies are declared via Swift Package Manager and locked in
    private menu-bar APIs
 ```
 
-### Main app (`XMenuBar/`)
+### Main app (`xBar/`)
 
 - **MenuBar:** Enumerates and moves status items, maintains hidden /
   always-hidden sections, layout reconciliation, spacing, appearance overlay,
-  and the XMenuBar Bar (IceBar) UI.
+  and the xBar (IceBar) UI.
 - **Events / Hotkeys:** User input paths that show or hide sections without
   going through the settings UI.
 - **Triggers:** Condition monitors (power, network, Focus, schedule, and
@@ -76,11 +76,11 @@ External dependencies are declared via Swift Package Manager and locked in
 - **Permissions:** Guides the user through TCC prompts required for AX and
   screen capture features.
 - **Updates:** Sparkle client; feed URL and EdDSA public key live in
-  `XMenuBar/Resources/Info.plist`.
+  `xBar/Resources/Info.plist`.
 
 ### `MenuBarItemService` (XPC)
 
-A separate process (`com.xera.xmenubar.MenuBarItemService`) isolates
+A separate process (`com.xera.xbar.MenuBarItemService`) isolates
 WindowServer and PID lookup work from the UI process. The shared protocol is a
 small Codable request/response surface: `start`, `configureLogging`, and
 `sourcePIDs`. Logging to a shared diagnostic file is configured by the main app
@@ -88,8 +88,8 @@ after launch.
 
 ### `MenuBarCaptureService` (XPC)
 
-A second helper (`com.xera.xmenubar.MenuBarCaptureService`) produces the images
-XMenuBar draws for menu bar items. Its protocol adds `captureBatch` and `recycle`
+A second helper (`com.xera.xbar.MenuBarCaptureService`) produces the images
+xBar draws for menu bar items. Its protocol adds `captureBatch` and `recycle`
 to the same `start` and `configureLogging` pair. The app asks for one batch per
 refresh rather than one call per window, and the helper exits once it has spent
 its capture budget, which bounds the per-call leak in the underlying SkyLight
@@ -97,7 +97,7 @@ API to the helper's lifetime rather than the app's.
 
 ### `MenuBarCaptureService` (XPC)
 
-A second Application XPC (`com.xera.xmenubar.MenuBarCaptureService`) captures
+A second Application XPC (`com.xera.xbar.MenuBarCaptureService`) captures
 offscreen Hidden / Always Hidden status-item windows via SkyLight. Each
 successful `SLWindowListCreateImageFromArray` call leaks a small dictionary in
 the caller; the helper exits after a capture budget (and when the last live
@@ -113,7 +113,7 @@ fence-port leak tracked as issue #933.
 
 | Interface | Direction | Notes |
 | --- | --- | --- |
-| `xmenubar://` URL scheme | Inbound | Automation / deep links; settings mutation is allowlisted + sender-signed; see [URI_SCHEMES.md](URI_SCHEMES.md) |
+| `xbar://` URL scheme | Inbound | Automation / deep links; settings mutation is allowlisted + sender-signed; see [URI_SCHEMES.md](URI_SCHEMES.md) |
 | Sparkle appcast HTTPS | Outbound | Update metadata and downloads over TLS |
 | Accessibility / Screen Recording | System | Required for core menu-bar manipulation and capture |
 | Crowdin | Out-of-band | Localization workflow (not runtime) |
@@ -122,32 +122,32 @@ fence-port leak tracked as issue #933.
 ## Data and persistence
 
 - Preferences and profiles: `UserDefaults` / app support files on the local Mac.
-- Diagnostic logs: optional local files (General settings); not uploaded by XMenuBar.
+- Diagnostic logs: optional local files (General settings); not uploaded by xBar.
 - No first-party cloud backend; no user accounts.
 
 ## Build and release
 
-- **Dev loop:** Open `XMenuBar.xcodeproj` in Xcode 26+, build/run.
+- **Dev loop:** Open `xBar.xcodeproj` in Xcode 26+, build/run.
 - **CI:** `.github/workflows/ci.yml` runs SwiftLint, `xcodebuild test`, and
   SonarCloud.
-  Shared release/CI pieces live in [`xmenubar-app/org-ci`](https://github.com/xmenubar-app/org-ci).
+  Shared release/CI pieces live in [`XERA-2011/org-ci`](https://github.com/XERA-2011/org-ci).
 - **Release:** Signed with Developer ID, notarized, packaged (ZIP/DMG), Sparkle
   appcast updated. See [VERIFYING_RELEASES.md](VERIFYING_RELEASES.md) and
   [RELEASES.md](RELEASES.md).
-- **Hosting:** Canonical source is [XERA-2011/x-menubar](https://github.com/XERA-2011/x-menubar).
+- **Hosting:** Canonical source is [XERA-2011/x-bar](https://github.com/XERA-2011/x-bar).
 
 ## Related organization repositories
 
-XMenuBar’s product surface spans more than this git tree. Inventory for maintainers
+xBar’s product surface spans more than this git tree. Inventory for maintainers
 and supply-chain review:
 
 | Repository | Role |
 | --- | --- |
-| [XERA-2011/x-menubar](https://github.com/XERA-2011/x-menubar) | Application source, issues, DMG releases, CI |
-| [xmenubar-app/updates](https://github.com/xmenubar-app/updates) | Sparkle appcast + update ZIP / deltas |
-| [xmenubar-app/brand-assets](https://github.com/xmenubar-app/brand-assets) | Shared brand artwork and README badges |
-| [xmenubar-app/org-ci](https://github.com/xmenubar-app/org-ci) | Reusable Actions (e.g. Sparkle release) |
-| [xmenubar-app/raycast-extension](https://github.com/xmenubar-app/raycast-extension) | Official Raycast extension |
+| [XERA-2011/x-bar](https://github.com/XERA-2011/x-bar) | Application source, issues, DMG releases, CI |
+| [XERA-2011/updates](https://github.com/XERA-2011/updates) | Sparkle appcast + update ZIP / deltas |
+| [XERA-2011/brand-assets](https://github.com/XERA-2011/brand-assets) | Shared brand artwork and README badges |
+| [XERA-2011/org-ci](https://github.com/XERA-2011/org-ci) | Reusable Actions (e.g. Sparkle release) |
+| [XERA-2011/raycast-extension](https://github.com/XERA-2011/raycast-extension) | Official Raycast extension |
 
 ## Related documents
 

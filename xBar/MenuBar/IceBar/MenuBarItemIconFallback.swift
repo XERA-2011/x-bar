@@ -1,0 +1,199 @@
+//
+//  MenuBarItemIconFallback.swift
+//  Project: xBar
+//
+//  Copyright (Ice) © 2023–2025 Jordan Baird
+//  Copyright (xBar) © 2026 Toni Förster
+//  Licensed under the GNU GPLv3
+
+import Cocoa
+
+/// The owning application's icon, shown where a captured glyph is not
+/// available.
+///
+/// Capturing a menu bar item needs Screen Recording. Without it the XMenuBar Bar
+/// previously rendered nothing at all — the permission was labelled optional,
+/// but a user who declined it and then hit notch overflow, which forces the
+/// XMenuBar Bar on by default, had no way to reach their hidden items. An app
+/// icon is not as good as the real glyph, and it cannot show a badge or a
+/// live value, but it identifies the item well enough to click the right one.
+///
+/// Ported from `OverflowFallbackIcon` in xmenubar-next, including the per-process
+/// cache, which is load-bearing rather than an optimisation — see
+/// ``appIconsByPID``.
+enum MenuBarItemIconFallback {
+    /// The Control Center icon once it has been resolved.
+    @MainActor
+    private static var cachedControlCenterIcon: NSImage?
+
+    /// The Control Center icon, shared by every system-hosted item.
+    ///
+    /// Cached on the first hit: these items are hosted by one process, so
+    /// reading a per-item icon would hand back the same image repeatedly. A
+    /// miss is deliberately *not* cached — the host may not be running yet
+    /// when the first system-hosted item is drawn, and remembering the `nil`
+    /// would pin every one of them to the generic glyph for the rest of the
+    /// process.
+    @MainActor
+    private static var controlCenterIcon: NSImage? {
+        if let cachedControlCenterIcon {
+            return cachedControlCenterIcon
+        }
+        let icon = NSRunningApplication
+            .runningApplications(withBundleIdentifier: SharedConstants.menuBarHostingBundleID)
+            .first?
+            .icon
+        cachedControlCenterIcon = icon
+        return icon
+    }
+
+    /// Application icons already resolved this session, keyed by owning
+    /// process.
+    ///
+    /// Both halves of resolving one allocate: `NSRunningApplication(processIdentifier:)`
+    /// returns a fresh object rather than a shared instance, and `.icon`
+    /// builds a new `NSImage` with its own representations. This is read from
+    /// SwiftUI view bodies, which re-evaluate whenever anything they observe
+    /// changes — with the bar open that is continuous, and resolving per
+    /// evaluation allocates faster than the autorelease pool drains, growing
+    /// the process for as long as the bar stays up.
+    ///
+    /// `NSImage?` rather than `NSImage` so a process that has no icon is
+    /// remembered as such instead of being re-resolved on every read.
+    @MainActor
+    private static var appIconsByPID: [pid_t: NSImage?] = [:]
+
+    /// Forgets the cached icon for a process.
+    ///
+    /// Keeps a relaunched app from being answered out of a dead process's
+    /// entry, and stops the map growing across a long session.
+    @MainActor
+    static func forgetIcon(forPID pid: pid_t) {
+        appIconsByPID.removeValue(forKey: pid)
+    }
+
+    /// Drops cached icons for processes that are no longer running.
+    @MainActor
+    static func forgetIconsForExitedApplications() {
+        let live = Set(NSWorkspace.shared.runningApplications.map(\.processIdentifier))
+        appIconsByPID = appIconsByPID.filter { live.contains($0.key) }
+    }
+
+    /// The owning application's icon, resolved once per process.
+    ///
+    /// Callers rendering item icons should come through here rather than
+    /// reading `sourceApplication?.icon` directly — see the note on
+    /// ``appIconsByPID`` for what that costs inside a view body.
+    @MainActor
+    static func cachedAppIcon(forPID pid: pid_t) -> NSImage? {
+        if let cached = appIconsByPID[pid] {
+            return cached
+        }
+        let icon = NSRunningApplication(processIdentifier: pid)?.icon
+        appIconsByPID[pid] = icon
+        return icon
+    }
+
+    /// Whether an item should be drawn as an app icon rather than a capture.
+    ///
+    /// Two reasons lead here: there is no capture to draw, or the user asked
+    /// for icons regardless. The preference deliberately loses to a missing
+    /// icon — an item whose app has quit still renders its stale capture
+    /// rather than degrading to a generic glyph, because the capture at
+    /// least shows what the item looked like.
+    ///
+    /// - Parameters:
+    ///   - item: The item being rendered.
+    ///   - hasCapture: Whether a captured glyph is available for it.
+    ///   - prefersAppIcon: The user's `alwaysUseAppIconForMenuBarItems`
+    ///     setting. Passed in rather than read from `Defaults` here so that
+    ///     SwiftUI views observing `AdvancedSettings` re-render when it is
+    ///     toggled.
+    @MainActor
+    static func shouldUseAppIcon(
+        for item: MenuBarItem,
+        hasCapture: Bool,
+        prefersAppIcon: Bool
+    ) -> Bool {
+        guard hasCapture else { return true }
+        guard prefersAppIcon else { return false }
+        return appIcon(for: item) != nil
+    }
+
+    /// The image to display for an item that has no usable capture.
+    ///
+    /// Returns an appropriate SF Symbol name for system-hosted or unresolvable items.
+    @MainActor
+    static func systemSymbolFallbackName(for item: MenuBarItem) -> String {
+        let title = (item.title ?? "").lowercased()
+        let name = item.displayName.lowercased()
+        let tagTitle = item.tag.title.lowercased()
+        let target = "\(title) \(name) \(tagTitle)"
+
+        if target.contains("wifi") || target.contains("airport") || target.contains("wi-fi") {
+            return "wifi"
+        }
+        if target.contains("battery") || target.contains("power") {
+            return "battery.100"
+        }
+        if target.contains("sound") || target.contains("audio") || target.contains("volume") || target.contains("mute") {
+            return "speaker.wave.2.fill"
+        }
+        if target.contains("bluetooth") {
+            return "dot.radiowaves.left.and.right"
+        }
+        if target.contains("clock") || target.contains("time") || target.contains("date") {
+            return "clock"
+        }
+        if target.contains("input") || target.contains("keyboard") || target.contains("textinput") || item.tag.namespace == .textInputMenuAgent {
+            return "character.textbox"
+        }
+        if target.contains("controlcenter") || item.tag == .controlCenter {
+            return "switch.2"
+        }
+        if target.contains("display") || target.contains("screen") {
+            return "display"
+        }
+        if target.contains("focus") || target.contains("dnd") || target.contains("donotdisturb") {
+            return "moon.fill"
+        }
+        if target.contains("music") || target.contains("nowplaying") {
+            return "music.note"
+        }
+        return "menubar.rectangle"
+    }
+
+    /// The fallback SF Symbol image to display when no app icon or capture is available.
+    @MainActor
+    static func fallbackSymbolImage(for item: MenuBarItem) -> NSImage? {
+        let symbolName = systemSymbolFallbackName(for: item)
+        return NSImage(
+            systemSymbolName: symbolName,
+            accessibilityDescription: item.displayName
+        )
+    }
+
+    /// The image to display for an item that has no usable capture.
+    @MainActor
+    static func image(for item: MenuBarItem) -> NSImage? {
+        appIcon(for: item) ?? fallbackSymbolImage(for: item)
+    }
+
+    /// The icon of the item's live source application.
+    ///
+    /// Deliberately has no generic fallback, so callers can tell an item
+    /// whose app has quit from one that simply has no icon.
+    @MainActor
+    static func appIcon(for item: MenuBarItem) -> NSImage? {
+        switch item.tag.namespace {
+        case .controlCenter, .systemUIServer, .textInputMenuAgent:
+            // Do not return generic Control Center icon so specific SF Symbols are used
+            return nil
+        default:
+            guard let sourcePID = item.sourcePID else {
+                return nil
+            }
+            return cachedAppIcon(forPID: sourcePID)
+        }
+    }
+}

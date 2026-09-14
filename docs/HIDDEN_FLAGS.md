@@ -1,20 +1,20 @@
-# XMenuBar Hidden Diagnostic Flags
+# xBar Hidden Diagnostic Flags
 
-XMenuBar has a small number of behavioural switches that are read from
+xBar has a small number of behavioural switches that are read from
 `UserDefaults` but are **not exposed in Settings**. They exist as escape
 hatches for diagnosing menu-bar reorder issues on hardware or setups the
 default behaviour does not handle well. Most users will never need them.
 
 These flags are registered as ordinary cases in `Defaults.Key` (see
-`XMenuBar/Utilities/Defaults.swift`), so their storage goes through the same
-`UserDefaults.standard` domain as every other XMenuBar setting. They are just
+`xBar/Utilities/Defaults.swift`), so their storage goes through the same
+`UserDefaults.standard` domain as every other xBar setting. They are just
 not surfaced in the UI.
 
 ## Overview
 
-All commands below use `defaults write` against XMenuBar's bundle identifier,
-`com.xera.xmenubar`. Changes take effect the next time the relevant code
-path runs; a relaunch of XMenuBar is the simplest way to guarantee that.
+All commands below use `defaults write` against xBar's bundle identifier,
+`com.xera.xbar`. Changes take effect the next time the relevant code
+path runs; a relaunch of xBar is the simplest way to guarantee that.
 
 ## Available Flags
 
@@ -28,19 +28,19 @@ path runs; a relaunch of XMenuBar is the simplest way to guarantee that.
 
 ```bash
 # Widen the input-pause window to 150 ms.
-defaults write com.xera.xmenubar inputPauseThresholdMs -int 150
+defaults write com.xera.xbar inputPauseThresholdMs -int 150
 
 # Disable discarding of stray move-event echoes.
-defaults write com.xera.xmenubar discardStrayMoveEvents -bool NO
+defaults write com.xera.xbar discardStrayMoveEvents -bool NO
 
 # Fail fast on a window mismatch instead of waiting for a timeout.
-defaults write com.xera.xmenubar failFastOnEventWindowMismatch -bool YES
+defaults write com.xera.xbar failFastOnEventWindowMismatch -bool YES
 ```
 
 To restore the default behaviour for a flag, remove the key:
 
 ```bash
-defaults delete com.xera.xmenubar inputPauseThresholdMs
+defaults delete com.xera.xbar inputPauseThresholdMs
 ```
 
 ## Notes for Contributors

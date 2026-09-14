@@ -1,4 +1,4 @@
 files:
-  - source: /XMenuBar/Resources/Localizable.xcstrings
-    translation: /XMenuBar/Resources/Localizable.xcstrings
+  - source: /xBar/Resources/Localizable.xcstrings
+    translation: /xBar/Resources/Localizable.xcstrings
     multilingual: 1

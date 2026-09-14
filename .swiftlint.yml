@@ -1,8 +1,5 @@
 included:
-  - MenuBarCaptureService
-  - MenuBarItemService
-  - Shared
-  - XMenuBar
+  - xBar
 
 disabled_rules:
   - cyclomatic_complexity
@@ -59,10 +56,10 @@ file_header:
   required_pattern: |-
     //
     //  SWIFTLINT_CURRENT_FILENAME
-    //  Project: XMenuBar
+    //  Project: xBar
     //
     //  Copyright \(Ice\) © 2023–2025 Jordan Baird
-    //  Copyright \(XMenuBar\) © 2026 Toni Förster
+    //  Copyright \(xBar\) © 2026 Toni Förster
     //  Licensed under the GNU GPLv3
 
 modifier_order:

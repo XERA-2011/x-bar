@@ -1,6 +1,6 @@
 # Roadmap
 
-Near-term direction (roughly the next year): keep XMenuBar compatible with current
+Near-term direction (roughly the next year): keep xBar compatible with current
 macOS releases, and harden release and contribution practices. Items may slip;
 the list is intent, not a contract.
 
@@ -14,7 +14,7 @@ the list is intent, not a contract.
 
 ## Integrations
 
-- Official Alfred workflow. The `xmenubar://` scheme already works with Alfred today
+- Official Alfred workflow. The `xbar://` scheme already works with Alfred today
   (see [URI schemes](URI_SCHEMES.md)); this covers a packaged, installable workflow
 
 ## Other
@@ -33,5 +33,5 @@ These were on the list above until 2.1.0 took them off it:
 ## Suggesting changes
 
 Roadmap items are tracked as issues. To propose something, open a
-[feature request](https://github.com/XERA-2011/x-menubar/issues/new/choose) or start with
-[Ways to contribute](https://github.com/XERA-2011/x-menubar/issues/316).
+[feature request](https://github.com/XERA-2011/x-bar/issues/new/choose) or start with
+[Ways to contribute](https://github.com/XERA-2011/x-bar/issues/316).

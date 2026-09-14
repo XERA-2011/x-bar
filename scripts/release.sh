@@ -7,7 +7,7 @@
 # the run with the one you pick, so a typo cannot reach the workflow.
 set -euo pipefail
 
-REPO="${REPO:-XERA-2011/x-menubar}"
+REPO="${REPO:-XERA-2011/x-bar}"
 WORKFLOW="release.yml"
 
 command -v gh >/dev/null || { echo "gh is required" >&2; exit 1; }
@@ -51,7 +51,7 @@ if [[ "$dry_run" == false ]]; then
     # answer it discards and prints it in the summary below.
     if [[ "$publish_release" == true ]]; then
         publish_appcast=true
-        ask "Push the signed appcast to xmenubar-app/updates?" y || publish_appcast=false
+        ask "Push the signed appcast to XERA-2011/updates?" y || publish_appcast=false
         PS3="discussion category> "
         select discussion_category in none Announcements General Ideas; do
             [[ -n "$discussion_category" ]] && break

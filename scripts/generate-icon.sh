@@ -3,8 +3,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-OUTPUT_ICNS="${ROOT_DIR}/XMenuBar/Resources/AppIcon.icns"
-TMP_DIR="/tmp/xmenubar_icon_gen_$$"
+SOURCE_DIR="${ROOT_DIR}/xBar"
+if [[ ! -d "${SOURCE_DIR}" ]]; then
+    SOURCE_DIR="${ROOT_DIR}/XMenuBar"
+fi
+OUTPUT_ICNS="${SOURCE_DIR}/Resources/AppIcon.icns"
+TMP_DIR="/tmp/xbar_icon_gen_$$"
 
 mkdir -p "${TMP_DIR}/AppIcon.iconset"
 trap 'rm -rf "${TMP_DIR}"' EXIT

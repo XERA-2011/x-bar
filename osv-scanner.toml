@@ -1,7 +1,7 @@
-# OSV-Scanner suppressions for XMenuBar's dependency SCA gate.
+# OSV-Scanner suppressions for xBar's dependency SCA gate.
 # Policy: .github/SECURITY.md § "Dependency SCA policy"
 #
-# Add an entry only when a finding is non-exploitable in XMenuBar's threat model
+# Add an entry only when a finding is non-exploitable in xBar's threat model
 # (or a fix is not yet available) and a maintainer has approved the waiver.
 # CI requires both `reason` and `ignoreUntil` on every IgnoredVulns entry.
 

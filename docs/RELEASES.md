@@ -1,17 +1,17 @@
 # Release and update distribution
 
-How XMenuBar ships installers vs in-app updates.
+How xBar ships installers vs in-app updates.
 
 ## Who hosts what
 
 | What | Where | URL pattern |
 | --- | --- | --- |
-| **Appcast** (`appcast.xml`) | [`xmenubar-app/updates`](https://github.com/xmenubar-app/updates) GitHub Pages | `https://xmenubar-app.github.io/updates/appcast.xml` |
-| **Update payloads** (Sparkle ZIP + deltas, all channels) | `xmenubar-app/updates` GitHub Releases (**canonical**; appcast enclosures) | `https://github.com/xmenubar-app/updates/releases/download/<tag>/…` |
-| **Update payloads (cutover mirror)** | Also attached to `XERA-2011/x-menubar` releases for ~2–3 releases | same files, XMenuBar release URLs (not used by appcast) |
-| **DMG** (human installer) + **SBOM** + Sigstore bundles + SLSA provenance | [`XERA-2011/x-menubar`](https://github.com/XERA-2011/x-menubar) GitHub Releases only | `https://github.com/XERA-2011/x-menubar/releases/…` |
+| **Appcast** (`appcast.xml`) | [`XERA-2011/updates`](https://github.com/XERA-2011/updates) GitHub Pages | `https://XERA-2011.github.io/updates/appcast.xml` |
+| **Update payloads** (Sparkle ZIP + deltas, all channels) | `XERA-2011/updates` GitHub Releases (**canonical**; appcast enclosures) | `https://github.com/XERA-2011/updates/releases/download/<tag>/…` |
+| **Update payloads (cutover mirror)** | Also attached to `XERA-2011/x-bar` releases for ~2–3 releases | same files, xBar release URLs (not used by appcast) |
+| **DMG** (human installer) + **SBOM** + Sigstore bundles + SLSA provenance | [`XERA-2011/x-bar`](https://github.com/XERA-2011/x-bar) GitHub Releases only | `https://github.com/XERA-2011/x-bar/releases/…` |
 
-The app polls the appcast (`SUFeedURL` in `XMenuBar/Resources/Info.plist`). Sparkle
+The app polls the appcast (`SUFeedURL` in `xBar/Resources/Info.plist`). Sparkle
 never downloads the DMG for in-app updates.
 
 ## Diagram
@@ -19,17 +19,17 @@ never downloads the DMG for in-app updates.
 ```mermaid
 flowchart LR
   subgraph clients["Clients"]
-    App["XMenuBar.app<br/>Sparkle updater"]
+    App["xBar.app<br/>Sparkle updater"]
     Human["Human / Homebrew"]
   end
 
-  subgraph updatesRepo["xmenubar-app/updates"]
+  subgraph updatesRepo["XERA-2011/updates"]
     Pages["GitHub Pages<br/>appcast.xml"]
     UpRel["GitHub Releases<br/>ZIP + deltas"]
   end
 
-  subgraph xmenubarRepo["XERA-2011/x-menubar"]
-    XMenuBarRel["GitHub Releases<br/>DMG + SBOM + provenance<br/>+ ZIP/deltas (cutover)"]
+  subgraph xmenubarRepo["XERA-2011/x-bar"]
+    xBarRel["GitHub Releases<br/>DMG + SBOM + provenance<br/>+ ZIP/deltas (cutover)"]
     CI["Release workflow"]
   end
 
@@ -37,17 +37,17 @@ flowchart LR
   Pages -->|"2. enclosure URLs"| App
   App -->|"3. download + EdDSA verify"| UpRel
 
-  Human --> XMenuBarRel
+  Human --> xBarRel
 
   CI -->|"publish ZIP/deltas + appcast"| updatesRepo
-  CI -->|"publish DMG + SBOM + provenance<br/>+ ZIP/deltas mirror"| XMenuBarRel
+  CI -->|"publish DMG + SBOM + provenance<br/>+ ZIP/deltas mirror"| xBarRel
 ```
 
 ## In-app update path
 
-1. App opens `https://xmenubar-app.github.io/updates/appcast.xml`.
+1. App opens `https://XERA-2011.github.io/updates/appcast.xml`.
 2. Appcast lists the newest build and points at a ZIP (or delta) on `updates` releases.
-3. Sparkle downloads that file from `xmenubar-app/updates`.
+3. Sparkle downloads that file from `XERA-2011/updates`.
 4. Sparkle verifies the EdDSA signature against `SUPublicEDKey`.
 5. Sparkle installs the update.
 
@@ -56,20 +56,20 @@ GitHub (or similar).
 
 ## What the release job does
 
-Order matters: update assets are published **before** the XMenuBar DMG so a failed
+Order matters: update assets are published **before** the xBar DMG so a failed
 `updates` publish does not leave a public installer without matching Sparkle
 payloads.
 
 1. Build and notarize.
 2. Generate a CycloneDX SBOM of the resolved SwiftPM dependencies with Syft
-   (`XMenuBar_<tag>.cdx.json`), and checksum the DMG.
+   (`xBar_<tag>.cdx.json`), and checksum the DMG.
 3. Create Sparkle ZIP (and deltas when prior ZIPs exist).
-4. Publish ZIP + deltas to **`xmenubar-app/updates`** (same tag).
-5. Cosign-sign the installer DMG and SBOM; create the **`XERA-2011/x-menubar`** release
+4. Publish ZIP + deltas to **`XERA-2011/updates`** (same tag).
+5. Cosign-sign the installer DMG and SBOM; create the **`XERA-2011/x-bar`** release
    **as a draft** with DMG + SBOM + `*.sigstore.json` + `*.sha256`, and (during
    cutover) the same Sparkle ZIP + deltas as a mirror.
-6. Push signed `appcast.xml` to **`xmenubar-app/updates`** `gh-pages` (new enclosure
-   URLs point at `updates`, not the XMenuBar mirror).
+6. Push signed `appcast.xml` to **`XERA-2011/updates`** `gh-pages` (new enclosure
+   URLs point at `updates`, not the xBar mirror).
 7. Sign build provenance for the DMG and SBOM in the reusable
    [`attest-build-provenance.yml`](../.github/workflows/attest-build-provenance.yml)
    workflow (a signing identity separate from the macOS build job); attach
@@ -78,23 +78,23 @@ payloads.
 
 ### Cutover dual-publish
 
-For the first ~2–3 releases after moving Sparkle hosting to `xmenubar-app/updates`,
+For the first ~2–3 releases after moving Sparkle hosting to `XERA-2011/updates`,
 ZIP and deltas are uploaded to **both** repos. The appcast keeps a single
-enclosure URL per file, pointing at `updates`. The XMenuBar copies are a safety net
-only. Remove the XMenuBar Sparkle attachments once a couple of updates-hosted
+enclosure URL per file, pointing at `updates`. The xBar copies are a safety net
+only. Remove the xBar Sparkle attachments once a couple of updates-hosted
 releases have shipped cleanly.
 
 The release is drafted in step 5 and published in step 7 so that a failed
 attestation leaves an unpublished draft rather than a public release with no
 provenance. The appcast in step 6 goes out first, so an appcast entry's release
 link can 404 for the minute or two the attestation jobs take; in-app updates are
-unaffected, since Sparkle downloads from `xmenubar-app/updates`.
+unaffected, since Sparkle downloads from `XERA-2011/updates`.
 
 Workflow: [`.github/workflows/release.yml`](../.github/workflows/release.yml).  
-Shared Sparkle action: [`xmenubar-app/org-ci` `sparkle-release`](https://github.com/xmenubar-app/org-ci/tree/main/actions/sparkle-release).
+Shared Sparkle action: [`XERA-2011/org-ci` `sparkle-release`](https://github.com/XERA-2011/org-ci/tree/main/actions/sparkle-release).
 
-Required **release-environment** secret on XMenuBar: `UPDATES_GITHUB_TOKEN`
-(`contents: write` on `xmenubar-app/updates`). The updates softprops step must
+Required **release-environment** secret on xBar: `UPDATES_GITHUB_TOKEN`
+(`contents: write` on `XERA-2011/updates`). The updates softprops step must
 pass it as the action `token` input, because softprops v3 ignores `env: GITHUB_TOKEN`.
 
 ## Dispatching a release
@@ -126,7 +126,7 @@ step 7. Setting it on the draft in step 5 would do nothing.
 Check **Dry run** when dispatching the workflow to build and report without
 publishing anything. Steps 1–3 run normally; steps 4–7 are skipped, so no
 GitHub Release is created (not even a draft), nothing is cosign-signed or
-attested, and no appcast is pushed to either `xmenubar-app/updates` or the legacy
+attested, and no appcast is pushed to either `XERA-2011/updates` or the legacy
 mirror.
 
 Signing and attestation are skipped deliberately: cosign keyless signing and
@@ -139,7 +139,7 @@ The run's job summary then reports:
   SHA-256, and whether the release would be a draft or published;
 - the SBOM component inventory;
 - a unified diff of the generated `appcast.xml` against the currently live feeds
-  at `xmenubar-app.github.io/updates` and `stonerl.github.io/XMenuBar`, so you can see
+  at `XERA-2011.github.io/updates` and `stonerl.github.io/xBar`, so you can see
   exactly what an update push would change.
 
 The DMG checksum, SBOM (+ checksum), and generated appcast are attached to the
@@ -213,16 +213,16 @@ worth saying wherever alpha is advertised.
 
 ## Legacy installs
 
-Older builds may still poll `https://stonerl.github.io/XMenuBar/appcast.xml`
-(GitHub Pages from [`XERA-2011/x-menubar`](https://github.com/XERA-2011/x-menubar) `main`,
+Older builds may still poll `https://stonerl.github.io/xBar/appcast.xml`
+(GitHub Pages from [`XERA-2011/x-bar`](https://github.com/XERA-2011/x-bar) `main`,
 path `/appcast.xml`). Release CI **mirrors** the same signed `appcast.xml` to
-that repo after publishing to `xmenubar-app/updates`, so existing installs keep
+that repo after publishing to `XERA-2011/updates`, so existing installs keep
 updating without an HTTP redirect. Bridge / new builds ship the
-`xmenubar-app.github.io/updates` `SUFeedURL` directly.
+`XERA-2011.github.io/updates` `SUFeedURL` directly.
 
 Historical enclosure URLs already in the appcast (for example old
-`XERA-2011/x-menubar` release ZIP links) stay as-is so EdDSA signatures remain valid.
-Only **new** items point at `xmenubar-app/updates` releases.
+`XERA-2011/x-bar` release ZIP links) stay as-is so EdDSA signatures remain valid.
+Only **new** items point at `XERA-2011/updates` releases.
 
 ## Related
 

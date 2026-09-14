@@ -2,15 +2,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "XMenuBar",
+    name: "xBar",
     defaultLocalization: "en",
     platforms: [
         .macOS("26.0"),
     ],
     products: [
         .executable(
-            name: "XMenuBar",
-            targets: ["XMenuBar"]
+            name: "xBar",
+            targets: ["xBar"]
         ),
     ],
     dependencies: [
@@ -22,7 +22,7 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "XMenuBar",
+            name: "xBar",
             dependencies: [
                 .product(name: "AXSwift6", package: "AXSwift6"),
                 .product(name: "LaunchAtLogin", package: "LaunchAtLogin-Modern"),
@@ -30,7 +30,7 @@ let package = Package(
                 .product(name: "Algorithms", package: "swift-algorithms"),
                 .product(name: "Collections", package: "swift-collections"),
             ],
-            path: "XMenuBar",
+            path: "xBar",
             exclude: [
                 "Resources",
             ],
