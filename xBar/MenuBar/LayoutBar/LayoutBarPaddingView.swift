@@ -170,26 +170,16 @@ final class LayoutBarPaddingView: NSView {
             return false
         }
 
-        if draggingSource.isNewItemsBadge {
-            let sourceContainer = draggingSource.oldContainerInfo?.container
-            container.appState?.itemManager.updateNewItemsPlacement(
-                section: container.section,
-                arrangedViews: arrangedViews
-            )
-            draggingSource.oldContainerInfo = nil
+        let sourceContainer = draggingSource.oldContainerInfo?.container
+        if container.section == .hidden, sourceContainer?.section == .hidden {
+            // Hidden items cannot be reordered within Hidden ("Hidden 不让调整位置")
             container.resumeArrangedViewUpdatesWithoutAnimation()
             sourceContainer?.resumeArrangedViewUpdatesWithoutAnimation()
-            if let appState = container.appState {
-                sourceContainer?.setArrangedViews(items: appState.itemManager.itemCache.managedItems(for: sourceContainer?.section ?? container.section))
-                if sourceContainer !== container {
-                    container.setArrangedViews(items: appState.itemManager.itemCache.managedItems(for: container.section))
-                }
-            }
-            return true
+            draggingSource.oldContainerInfo = nil
+            return false
         }
 
         var willMove = false
-        let sourceContainer = draggingSource.oldContainerInfo?.container
 
         if let index = arrangedViews.firstIndex(of: draggingSource) {
             if arrangedViews.count == 1 {
@@ -308,7 +298,7 @@ final class LayoutBarPaddingView: NSView {
         // Explicit strong captures: the move must complete even if the view
         // is torn down mid-drag; only the longer-lived watchdog below holds
         // weak references.
-        stabilizationTask = Task { [self, appState] in
+        stabilizationTask = Task { [self, appState, sourceContainer] in
             var didValidateUserMove = false
             @MainActor
             func acceptValidatedUserMove() {
@@ -349,6 +339,47 @@ final class LayoutBarPaddingView: NSView {
             // section whose parked content would keep the divider offscreen.
             var destination = destination
             var revealedSections: [MenuBarSection] = []
+
+            // When moving into or out of a collapsed hidden section, temporarily reveal
+            // the hidden section on screen so macOS WindowServer can perform the drag
+            // without rejecting offscreen windows.
+            if container.section == .hidden || sourceContainer?.section == .hidden {
+                let hiddenSection = await MainActor.run {
+                    appState.menuBarManager.section(withName: .hidden)
+                }
+                if let hiddenSection {
+                    let isCollapsed = await MainActor.run {
+                        hiddenSection.controlItem.state == .hideSection
+                    }
+                    if isCollapsed, !revealedSections.contains(where: { $0 === hiddenSection }) {
+                        revealedSections.append(hiddenSection)
+                        await MainActor.run {
+                            hiddenSection.controlItem.state = .showSection
+                        }
+                        try? await Task.sleep(for: .milliseconds(80))
+                    }
+                }
+            }
+            if container.section == .alwaysHidden || sourceContainer?.section == .alwaysHidden {
+                for name in [MenuBarSection.Name.hidden, .alwaysHidden] {
+                    let sec = await MainActor.run {
+                        appState.menuBarManager.section(withName: name)
+                    }
+                    if let sec {
+                        let isCollapsed = await MainActor.run {
+                            sec.controlItem.state == .hideSection
+                        }
+                        if isCollapsed, !revealedSections.contains(where: { $0 === sec }) {
+                            revealedSections.append(sec)
+                            await MainActor.run {
+                                sec.controlItem.state = .showSection
+                            }
+                        }
+                    }
+                }
+                try? await Task.sleep(for: .milliseconds(80))
+            }
+
             let targetItem = destination.targetItem
             if targetItem.isControlItem {
                 let screenFrames = NSScreen.screens.map { CGDisplayBounds($0.displayID) }
@@ -626,18 +657,6 @@ final class LayoutBarPaddingView: NSView {
                 }
                 self.isStabilizing = false
                 self.stabilizationTask = nil
-                // Update the badge anchor BEFORE re-enabling view updates, using
-                // the current visual arrangement from the drag. This ensures the
-                // didSet refresh uses the correct anchor position.
-                // Only update if this section actually contains the badge.
-                if let appState = self.container.appState,
-                   self.containsNewItemsBadge()
-                {
-                    appState.itemManager.updateNewItemsPlacement(
-                        section: self.container.section,
-                        arrangedViews: self.container.arrangedViews
-                    )
-                }
                 // Re-enable view updates on both the destination (frozen by
                 // draggingEntered) and the source (frozen by willBeginAt on
                 // the dragging session). Without resetting the source, its
@@ -860,13 +879,6 @@ final class LayoutBarPaddingView: NSView {
             sourceContainer?.resumeArrangedViewUpdatesWithoutAnimation()
         }
         return true
-    }
-
-    private func containsNewItemsBadge() -> Bool {
-        for arrangedView in container.arrangedViews where arrangedView.isNewItemsBadge {
-            return true
-        }
-        return false
     }
 
     private func items(in views: [LayoutBarArrangedView]) -> [MenuBarItem] {

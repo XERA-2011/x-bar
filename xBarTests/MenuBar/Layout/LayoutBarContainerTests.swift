@@ -11,55 +11,55 @@ import Testing
 @testable import xBar
 
 @MainActor
-@Suite("Badge-only layout section drops")
+final class TestLayoutBarArrangedView: LayoutBarArrangedView {
+    override var kind: Kind {
+        .item(.fixture(tag: .appItem(bundleID: "com.test.app", title: "Test"), windowID: 1))
+    }
+}
+
+@MainActor
+@Suite("Layout section drops")
 struct LayoutBarContainerTests {
-    @Test("A regular item sees a badge-only section as an empty drop target")
-    func badgeOnlySectionHasNoRegularItemDropTargets() {
-        let badge = LayoutBarNewItemsBadgeView()
-
-        let regularItemTargets = LayoutBarContainer.enabledDropTargets(
-            in: [badge],
-            excludingBadge: true
-        )
-        let badgeDragTargets = LayoutBarContainer.enabledDropTargets(
-            in: [badge],
-            excludingBadge: false
-        )
-
-        #expect(regularItemTargets.isEmpty)
-        #expect(badgeDragTargets.count == 1)
-        #expect(badgeDragTargets.first === badge)
-    }
-
-    @Test("A regular item lands on the side of the badge where it is dropped")
-    func badgeOnlyInsertionIndexUsesDropSideOfBadge() {
-        let badge = LayoutBarNewItemsBadgeView()
-        badge.setFrameOrigin(CGPoint(x: 100, y: 0))
-
-        let beforeBadgeIndex = LayoutBarContainer.emptyTargetInsertionIndex(
-            for: badge.frame.midX - 1,
-            in: [badge],
-            excludingBadge: true
-        )
-        let afterBadgeIndex = LayoutBarContainer.emptyTargetInsertionIndex(
-            for: badge.frame.midX + 1,
-            in: [badge],
-            excludingBadge: true
-        )
-
-        #expect(beforeBadgeIndex == 0)
-        #expect(afterBadgeIndex == 1)
-    }
-
     @Test("An empty section inserts its first item at the beginning")
     func emptySectionInsertionIndexStartsAtBeginning() {
         let insertionIndex = LayoutBarContainer.emptyTargetInsertionIndex(
             for: 500,
-            in: [],
-            excludingBadge: true
+            in: []
         )
 
         #expect(insertionIndex == 0)
+    }
+
+    @Test("Dragging within Hidden section is rejected")
+    func hiddenReorderingIsRejected() {
+        let appState = AppState()
+        let hidden = LayoutBarContainer(appState: appState, section: .hidden)
+        let view1 = TestLayoutBarArrangedView()
+        let view2 = TestLayoutBarArrangedView()
+        hidden.arrangedViews = [view1, view2]
+        view1.oldContainerInfo = (hidden, 0)
+
+        // Mock dragging info with source from hidden itself
+        final class MockDraggingInfo: NSObject, NSDraggingInfo {
+            var draggingSource: Any?
+            var draggingLocation: NSPoint = .zero
+            var draggingDestinationWindow: NSWindow?
+            var draggingSourceOperationMask: NSDragOperation = .move
+            var numberOfValidItemsForDrop: Int = 1
+            var draggedImageState: Any?
+            var draggingFormation: NSDraggingFormation = .default
+            var animatesToDestination: Bool = false
+            var draggingSequenceNumber: Int = 1
+            var draggingPasteboard: NSPasteboard = .init(name: .drag)
+            func draggingItem(at index: Int) -> NSDraggingItem { fatalError() }
+            func enumerateDraggingItems(options: NSDraggingItemEnumerationOptions = [], for view: NSView?, classes: [AnyClass], searchOptions: [NSPasteboard.ReadingOptionKey : Any] = [:], using block: @escaping (NSDraggingItem, Int, UnsafeMutablePointer<ObjCBool>) -> Void) {}
+            func resetSpringLoading() {}
+        }
+
+        let info = MockDraggingInfo()
+        info.draggingSource = view1
+        let operation = hidden.updateArrangedViewsForDrag(with: info, phase: .updated)
+        #expect(operation == [])
     }
 }
 
@@ -195,21 +195,13 @@ struct LayoutBarItemDragPresentationTests {
         ))
     }
 
-    @Test("The New Items badge remains visible while dragged")
-    func draggedBadgeKeepsVisiblePlaceholder() {
-        let opacity = LayoutBarNewItemsBadgeView.contentOpacity(isDraggingPlaceholder: true)
-
-        #expect(opacity > 0)
-        #expect(opacity < 1)
-    }
-
     @Test("A cancelled cross-row drag restores the original view exactly once")
     @MainActor
     func cancelledCrossRowDragRestoresOriginalView() {
         let appState = AppState()
         let source = LayoutBarContainer(appState: appState, section: .visible)
         let destination = LayoutBarContainer(appState: appState, section: .hidden)
-        let draggedView = LayoutBarNewItemsBadgeView()
+        let draggedView = TestLayoutBarArrangedView()
 
         source.arrangedViews = [draggedView]
         source.arrangedViews.removeAll()

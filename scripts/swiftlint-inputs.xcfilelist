@@ -24,7 +24,6 @@ $(SRCROOT)/xBar/MenuBar/LayoutBar/LayoutBar.swift
 $(SRCROOT)/xBar/MenuBar/LayoutBar/LayoutBarArrangedView.swift
 $(SRCROOT)/xBar/MenuBar/LayoutBar/LayoutBarContainer.swift
 $(SRCROOT)/xBar/MenuBar/LayoutBar/LayoutBarItemView.swift
-$(SRCROOT)/xBar/MenuBar/LayoutBar/LayoutBarNewItemsBadgeView.swift
 $(SRCROOT)/xBar/MenuBar/LayoutBar/LayoutBarPaddingView.swift
 $(SRCROOT)/xBar/MenuBar/LayoutBar/LayoutBarScrollView.swift
 $(SRCROOT)/xBar/MenuBar/LayoutBar/MenuBarLayoutEditorPanel.swift

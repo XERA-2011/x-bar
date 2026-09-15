@@ -1313,14 +1313,9 @@ final class MenuBarItemManager {
         return (wid, section)
     }
 
-    /// Returns the effective section for newly detected menu bar items, falling back
-    /// to hidden when the always-hidden section is currently disabled.
+    /// Returns the effective section for newly detected menu bar items.
     var effectiveNewItemsSection: MenuBarSection.Name {
-        let preferredSection = sectionName(for: newItemsPlacement.sectionKey) ?? .hidden
-        if preferredSection == .alwaysHidden, appState?.settings.advanced.enableAlwaysHiddenSection != true {
-            return .hidden
-        }
-        return preferredSection
+        .hidden
     }
 
     /// Returns the insertion index for the New Items badge within the given section.
@@ -1437,7 +1432,6 @@ final class MenuBarItemManager {
     }
 
     /// Updates the preferred destination for newly detected menu bar items using the
-    /// badge position from the layout editor.
     func updateNewItemsPlacement(
         section: MenuBarSection.Name,
         arrangedViews: [LayoutBarArrangedView]
@@ -1448,53 +1442,11 @@ final class MenuBarItemManager {
             section
         }
 
-        let updatedPlacement: NewItemsPlacement
-        if let badgeIndex = arrangedViews.firstIndex(where: { $0.isNewItemsBadge }) {
-            let rightNeighbor = arrangedViews[(badgeIndex + 1) ..< arrangedViews.count]
-                .compactMap { view -> MenuBarItem? in
-                    if case let .item(item) = view.kind {
-                        return item
-                    }
-                    return nil
-                }
-                .first
-
-            let leftNeighbor = arrangedViews[..<badgeIndex]
-                .reversed()
-                .compactMap { view -> MenuBarItem? in
-                    if case let .item(item) = view.kind {
-                        return item
-                    }
-                    return nil
-                }
-                .first
-
-            if let rightNeighbor {
-                updatedPlacement = NewItemsPlacement(
-                    sectionKey: sectionKey(for: resolvedSection),
-                    anchorIdentifier: persistedNewItemsAnchorIdentifier(for: rightNeighbor),
-                    relation: .leftOfAnchor
-                )
-            } else if let leftNeighbor {
-                updatedPlacement = NewItemsPlacement(
-                    sectionKey: sectionKey(for: resolvedSection),
-                    anchorIdentifier: persistedNewItemsAnchorIdentifier(for: leftNeighbor),
-                    relation: .rightOfAnchor
-                )
-            } else {
-                updatedPlacement = NewItemsPlacement(
-                    sectionKey: sectionKey(for: resolvedSection),
-                    anchorIdentifier: nil,
-                    relation: .sectionDefault
-                )
-            }
-        } else {
-            updatedPlacement = NewItemsPlacement(
-                sectionKey: sectionKey(for: resolvedSection),
-                anchorIdentifier: nil,
-                relation: .sectionDefault
-            )
-        }
+        let updatedPlacement = NewItemsPlacement(
+            sectionKey: sectionKey(for: resolvedSection),
+            anchorIdentifier: nil,
+            relation: .sectionDefault
+        )
 
         guard newItemsPlacement != updatedPlacement else {
             return
@@ -1502,7 +1454,7 @@ final class MenuBarItemManager {
 
         newItemsPlacement = updatedPlacement
         persistNewItemsPlacementPreference()
-        MenuBarItemManager.diagLog.debug("Updated new item destination to \(resolvedSection.logString) at relation \(updatedPlacement.relation.rawValue)")
+        MenuBarItemManager.diagLog.debug("Updated new item destination to \(resolvedSection.logString)")
     }
 
     /// Applies a previously captured ``NewItemsPlacement`` (from a profile),

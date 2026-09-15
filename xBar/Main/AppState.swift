@@ -443,6 +443,12 @@ final class AppState {
         Task { @MainActor [weak self] in
             guard let self else { return }
 
+            if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == id.rawValue }) {
+                self.activate(withPolicy: .regular)
+                window.makeKeyAndOrderFront(nil)
+                return
+            }
+
             if self.openWindows.contains(id) {
                 self.diagLog.debug("Window \(id) already open, activating existing window")
                 self.activate(withPolicy: .regular)
@@ -455,6 +461,9 @@ final class AppState {
 
             try? await Task.sleep(for: .milliseconds(100))
             self.activate(withPolicy: .regular)
+            if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == id.rawValue }) {
+                window.makeKeyAndOrderFront(nil)
+            }
         }
     }
 

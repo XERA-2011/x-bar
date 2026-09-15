@@ -87,26 +87,17 @@ final class LayoutBarContainer: NSView {
         }
     }
 
-    private var cancellables = Set<AnyCancellable>()
-
     /// Task observing `AdvancedSettings.enableAlwaysHiddenSection`, which is
     /// `@Observable` rather than a Combine `ObservableObject`, so it can no
     /// longer take part in the `Publishers.CombineLatest3` below.
     private var enableAlwaysHiddenSectionObservationTask: Task<Void, Never>?
 
-    /// Task observing `menuBarManager.averageColorInfo` (wave 3), replacing
-    /// the old `$averageColorInfo` sink.
-    private var averageColorInfoObservationTask: Task<Void, Never>?
-
-    /// Task observing `itemManager.itemCache` and `itemManager.newItemsPlacement`
-    /// (wave 4), which are `@Observable` rather than Combine `@Published`
-    /// properties, so they can no longer take part in `Publishers.CombineLatest`.
-    /// Replaces the old `CombineLatest($itemCache, $newItemsPlacement).sink`.
+    /// Task observing `itemManager.itemCache` (wave 4), which is
+    /// `@Observable` rather than a Combine `@Published` property.
     private var itemCacheObservationTask: Task<Void, Never>?
 
     deinit {
         enableAlwaysHiddenSectionObservationTask?.cancel()
-        averageColorInfoObservationTask?.cancel()
         itemCacheObservationTask?.cancel()
     }
 
@@ -129,19 +120,14 @@ final class LayoutBarContainer: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    /// Tracks the last known notch state to avoid redundant badge updates.
-    private var lastScreenHasNotch: Bool?
-
     private func configureCancellables() {
-        var c = Set<AnyCancellable>()
-
         if let appState {
             let itemManager = appState.itemManager
             itemCacheObservationTask = Task { [weak self] in
                 let changes = Observations {
-                    (itemManager.itemCache, itemManager.newItemsPlacement)
+                    itemManager.itemCache
                 }
-                for await (cache, _) in changes {
+                for await cache in changes {
                     guard let self else {
                         return
                     }
@@ -160,64 +146,6 @@ final class LayoutBarContainer: NSView {
                     guard let self else { return }
                     setArrangedViews(items: itemManager.itemCache.managedItems(for: section))
                 }
-            }
-
-            // Observe average color changes to update badge appearance.
-            // `menuBarManager` is now `@Observable` (wave 3), so it no
-            // longer has an `$averageColorInfo` publisher.
-            averageColorInfoObservationTask = Task { [weak self, weak appState] in
-                var previous: MenuBarAverageColorInfo?
-                let changes = Observations { appState?.menuBarManager.averageColorInfo }
-                for await colorInfo in changes {
-                    guard let self else { return }
-                    guard colorInfo != previous else { continue }
-                    previous = colorInfo
-                    // Update the color info on the badge view
-                    if let badgeView = self.arrangedViews.first(where: { $0.isNewItemsBadge }) {
-                        badgeView.averageColorInfo = colorInfo
-                    }
-                }
-            }
-
-            // Observe screen parameter changes (moving between displays) to update badge
-            NotificationCenter.default
-                .publisher(for: NSApplication.didChangeScreenParametersNotification)
-                .sink { [weak self] _ in
-                    guard let self else { return }
-                    // Force update badge's color info and redraw when screen changes
-                    if let badgeView = arrangedViews.first(where: { $0.isNewItemsBadge }) {
-                        badgeView.averageColorInfo = appState.menuBarManager.averageColorInfo
-                    }
-                }
-                .store(in: &c)
-
-            // Detect when the Settings window is dragged to a display with a
-            // different notch state. NSApplication.didChangeScreenParametersNotification
-            // does not fire for window movement between screens, but
-            // NSWindow.didChangeScreenNotification does.
-            NotificationCenter.default
-                .publisher(for: NSWindow.didChangeScreenNotification)
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] notification in
-                    guard let self,
-                          let notifyingWindow = notification.object as? NSWindow,
-                          notifyingWindow === self.window
-                    else { return }
-                    updateBadgeForScreenChange()
-                }
-                .store(in: &c)
-        }
-
-        cancellables = c
-    }
-
-    /// Updates the badge view's color info when the screen changes (notch detection)
-    private func updateBadgeForScreenChange() {
-        let currentHasNotch = NSScreen.screenWithActiveMenuBar?.hasNotch ?? false
-        if lastScreenHasNotch != currentHasNotch {
-            lastScreenHasNotch = currentHasNotch
-            if let badgeView = arrangedViews.first(where: { $0.isNewItemsBadge }) {
-                badgeView.averageColorInfo = appState?.menuBarManager.averageColorInfo
             }
         }
     }
@@ -323,8 +251,6 @@ final class LayoutBarContainer: NSView {
         // choice for the actual ordered reconciliation that follows.
         let shouldAnimateReconciledLayout = shouldAnimateNextLayoutPass
         var newViews = [LayoutBarArrangedView]()
-        let itemIdentifiers = items.map(\.uniqueIdentifier)
-        let badgeIndex = appState.itemManager.newItemsBadgeIndex(in: section, itemIdentifiers: itemIdentifiers)
         for item in items {
             if let existingView = arrangedViews.lazy
                 .compactMap({ $0 as? LayoutBarItemView })
@@ -339,12 +265,6 @@ final class LayoutBarContainer: NSView {
                 let view = LayoutBarItemView(appState: appState, item: item)
                 newViews.append(view)
             }
-        }
-        if let badgeIndex {
-            let badgeView = arrangedViews.first(where: { $0.isNewItemsBadge }) ?? LayoutBarNewItemsBadgeView()
-            badgeView.averageColorInfo = appState.menuBarManager.averageColorInfo
-            let insertionIndex = badgeIndex.clamped(to: newViews.startIndex ... newViews.endIndex)
-            newViews.insert(badgeView, at: insertionIndex)
         }
 
         // Observation can publish the same ordered cache more than once while
@@ -409,22 +329,34 @@ final class LayoutBarContainer: NSView {
             {
                 sourceView.oldContainerInfo = (self, sourceIndex)
             }
+
+            // Hidden section handling:
+            // 1. Reordering within Hidden is not allowed ("Hidden 不让调整位置").
+            // 2. Dragging down from Visible into Hidden always places the item at the leftmost (index 0).
+            if section == .hidden {
+                let isSourceFromHidden = sourceView.oldContainerInfo?.container.section == .hidden
+                if isSourceFromHidden {
+                    // Do not allow reordering inside Hidden
+                    return []
+                } else {
+                    // Dragged from Visible to Hidden: insert at leftmost (index 0)
+                    if !arrangedViews.contains(sourceView) {
+                        transferArrangedViewFromSourceIfNeeded(sourceView)
+                        arrangedViews.insert(sourceView, at: 0)
+                    } else if let currentIndex = arrangedViews.firstIndex(of: sourceView), currentIndex != 0 {
+                        arrangedViews.move(fromOffsets: [currentIndex], toOffset: 0)
+                    }
+                    return .move
+                }
+            }
+
             // convert dragging location from window coordinates
             let draggingLocation = convert(draggingInfo.draggingLocation, from: nil)
-            // When dragging a regular item (not the badge), exclude the badge
-            // from being a swap destination. The badge position should only
-            // change when the user explicitly drags the badge itself.
-            let excludeBadge = !sourceView.isNewItemsBadge
-            // Updating normally relies on the presence of other arranged
-            // views. A section containing only the New Items badge should
-            // still accept regular item drops; otherwise the badge becomes a
-            // dead zone that prevents moving the first icon into the section.
-            guard !Self.enabledDropTargets(in: arrangedViews, excludingBadge: excludeBadge).isEmpty else {
+            guard !Self.enabledDropTargets(in: arrangedViews).isEmpty else {
                 if !arrangedViews.contains(sourceView) {
                     let insertionIndex = Self.emptyTargetInsertionIndex(
                         for: draggingLocation.x,
-                        in: arrangedViews,
-                        excludingBadge: excludeBadge
+                        in: arrangedViews
                     )
                     transferArrangedViewFromSourceIfNeeded(sourceView)
                     arrangedViews.insert(sourceView, at: insertionIndex)
@@ -432,7 +364,7 @@ final class LayoutBarContainer: NSView {
                 return .move
             }
             guard
-                let destinationView = arrangedView(nearestTo: draggingLocation.x, excludingBadge: excludeBadge),
+                let destinationView = arrangedView(nearestTo: draggingLocation.x),
                 destinationView !== sourceView,
                 // don't rearrange if destination is disabled
                 destinationView.isEnabled,
@@ -462,10 +394,6 @@ final class LayoutBarContainer: NSView {
             } else {
                 // source view is being dragged from another container,
                 // so transfer array ownership before adopting the NSView.
-                // NSView.addSubview moves the view between superviews, but it
-                // cannot remove the stale reference from the source's
-                // arrangedViews; leaving that reference lets the source
-                // detach the icon from this destination during reconciliation.
                 transferArrangedViewFromSourceIfNeeded(sourceView)
                 arrangedViews.insert(sourceView, at: destinationIndex)
             }
@@ -512,26 +440,16 @@ final class LayoutBarContainer: NSView {
     }
 
     static func enabledDropTargets(
-        in arrangedViews: [LayoutBarArrangedView],
-        excludingBadge: Bool
+        in arrangedViews: [LayoutBarArrangedView]
     ) -> [LayoutBarArrangedView] {
-        arrangedViews.filter { view in
-            view.isEnabled && (!excludingBadge || !view.isNewItemsBadge)
-        }
+        arrangedViews.filter { $0.isEnabled }
     }
 
     static func emptyTargetInsertionIndex(
         for xPosition: CGFloat,
-        in arrangedViews: [LayoutBarArrangedView],
-        excludingBadge: Bool
+        in arrangedViews: [LayoutBarArrangedView]
     ) -> Int {
-        guard excludingBadge,
-              let badgeIndex = arrangedViews.firstIndex(where: { $0.isNewItemsBadge })
-        else {
-            return arrangedViews.startIndex
-        }
-        let badgeView = arrangedViews[badgeIndex]
-        return xPosition > badgeView.frame.midX ? badgeIndex + 1 : badgeIndex
+        arrangedViews.startIndex
     }
 
     /// Returns the nearest arranged view to the given X position within
@@ -543,12 +461,8 @@ final class LayoutBarContainer: NSView {
     /// - Parameters:
     ///   - xPosition: A floating point value representing an X position
     ///     within the coordinate system of the container view.
-    ///   - excludingBadge: If `true`, the New Items badge is excluded from
-    ///     consideration. Use this when dragging regular items to prevent
-    ///     them from swapping with the badge.
-    func arrangedView(nearestTo xPosition: CGFloat, excludingBadge: Bool = false) -> LayoutBarArrangedView? {
-        let candidates = excludingBadge ? arrangedViews.filter { !$0.isNewItemsBadge } : arrangedViews
-        return candidates.min { view1, view2 in
+    func arrangedView(nearestTo xPosition: CGFloat) -> LayoutBarArrangedView? {
+        arrangedViews.min { view1, view2 in
             let distance1 = abs(view1.frame.midX - xPosition)
             let distance2 = abs(view2.frame.midX - xPosition)
             return distance1 < distance2

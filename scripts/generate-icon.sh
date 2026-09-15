@@ -17,6 +17,16 @@ echo "==> Rendering 1024x1024 base icon..."
 BASE_PNG="${TMP_DIR}/base.png" \
 swift -e '
 import AppKit
+import CoreGraphics
+
+func createSquirclePath(rect: NSRect, radius: CGFloat) -> CGPath {
+    return CGPath(roundedRect: rect, cornerWidth: radius, cornerHeight: radius, transform: nil)
+}
+
+func createCapsulePath(rect: NSRect) -> CGPath {
+    let radius = rect.height / 2.0
+    return CGPath(roundedRect: rect, cornerWidth: radius, cornerHeight: radius, transform: nil)
+}
 
 let size = NSSize(width: 1024, height: 1024)
 let image = NSImage(size: size)
@@ -25,36 +35,62 @@ image.lockFocus()
 guard let ctx = NSGraphicsContext.current?.cgContext else { fatalError("No cgContext") }
 
 let iconRect = NSRect(x: 100, y: 100, width: 824, height: 824)
-let path = NSBezierPath(roundedRect: iconRect, xRadius: 185, yRadius: 185)
+let squircleR: CGFloat = 185
+let squircle = createSquirclePath(rect: iconRect, radius: squircleR)
 
+// Base Squircle Shadow & Fill
 ctx.saveGState()
-let shadow = NSShadow()
-shadow.shadowColor = NSColor(white: 0.0, alpha: 0.20)
-shadow.shadowOffset = NSSize(width: 0, height: -12)
-shadow.shadowBlurRadius = 24
-shadow.set()
-
-NSColor.white.setFill()
-path.fill()
+ctx.setShadow(offset: CGSize(width: 0, height: -14), blur: 28, color: NSColor(white: 0, alpha: 0.20).cgColor)
+ctx.setFillColor(NSColor.white.cgColor)
+ctx.addPath(squircle)
+ctx.fillPath()
 ctx.restoreGState()
 
-NSColor(white: 0.0, alpha: 0.08).setStroke()
-path.lineWidth = 2.0
-path.stroke()
+ctx.saveGState()
+ctx.addPath(squircle)
+ctx.clip()
 
-let iconColor = NSColor(srgbRed: 10.0 / 255.0, green: 10.0 / 255.0, blue: 10.0 / 255.0, alpha: 1.0)
-let config = NSImage.SymbolConfiguration(pointSize: 420, weight: .regular)
-    .applying(NSImage.SymbolConfiguration(paletteColors: [iconColor]))
+// Symbol Brand Black (#0a0a0a)
+let brandBlack = NSColor(srgbRed: 10.0 / 255.0, green: 10.0 / 255.0, blue: 10.0 / 255.0, alpha: 1.0)
 
-if let sf = NSImage(systemSymbolName: "menubar.rectangle", accessibilityDescription: nil)?.withSymbolConfiguration(config) {
-    let sfRect = NSRect(
-        x: (1024 - sf.size.width) / 2,
-        y: (1024 - sf.size.height) / 2,
-        width: sf.size.width,
-        height: sf.size.height
-    )
-    sf.draw(in: sfRect)
-}
+// Outer frame of the symbol (Variant 2: Classic Balanced, height 454px, vertically centered)
+let frameWidth: CGFloat = 584.0
+let frameHeight: CGFloat = 454.0
+let frameRadius: CGFloat = 92.0
+let frameY = iconRect.midY - frameHeight / 2.0
+let frameRect = NSRect(x: iconRect.midX - frameWidth / 2.0,
+                       y: frameY,
+                       width: frameWidth,
+                       height: frameHeight)
+let framePath = createSquirclePath(rect: frameRect, radius: frameRadius)
+
+let strokeW: CGFloat = 34.0
+ctx.setStrokeColor(brandBlack.cgColor)
+ctx.setLineWidth(strokeW)
+ctx.addPath(framePath)
+ctx.strokePath()
+
+// Inner capsule top bar (pure semicircle on both ends: radius = height / 2)
+let innerGap: CGFloat = 28.0
+let topBarGap = strokeW / 2.0 + innerGap
+let barHeight: CGFloat = 114.0
+let barRect = NSRect(x: frameRect.minX + topBarGap,
+                     y: frameRect.maxY - topBarGap - barHeight,
+                     width: frameRect.width - 2 * topBarGap,
+                     height: barHeight)
+let barPath = createCapsulePath(rect: barRect)
+
+ctx.setFillColor(brandBlack.cgColor)
+ctx.addPath(barPath)
+ctx.fillPath()
+
+// Outer squircle border line
+ctx.setStrokeColor(NSColor(white: 0, alpha: 0.08).cgColor)
+ctx.setLineWidth(2.0)
+ctx.addPath(squircle)
+ctx.strokePath()
+
+ctx.restoreGState()
 
 image.unlockFocus()
 

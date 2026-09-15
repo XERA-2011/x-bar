@@ -24,7 +24,7 @@ struct GeneralSettingsPane: View {
             IceSection("\(Constants.displayName) icon") {
                 iceIconOptions
             }
-            IceSection("Empty menu bar area") {
+            IceSection("Empty area") {
                 emptyAreaOptions
             }
         }
@@ -54,8 +54,8 @@ struct GeneralSettingsPane: View {
 
     @ViewBuilder
     private var emptyAreaOptions: some View {
-        IceMenu("Trigger action") {
-            Picker("Trigger action", selection: $settings.emptyAreaAction) {
+        IceMenu("Action") {
+            Picker("Action", selection: $settings.emptyAreaAction) {
                 ForEach(GeneralSettings.EmptyAreaAction.allCases) { action in
                     Label(action.localized, systemImage: action.iconName)
                         .tag(action)
@@ -86,7 +86,7 @@ struct GeneralSettingsPane: View {
                 SecondsLabel(value: advancedSettings.showOnHoverDelay)
             }
         } label: {
-            Text("Show on hover delay")
+            Text("Hover delay")
                 .frame(minWidth: maxSliderLabelWidth, alignment: .leading)
                 .onFrameChange { frame in
                     maxSliderLabelWidth = max(maxSliderLabelWidth, frame.width)

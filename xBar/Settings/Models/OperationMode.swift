@@ -30,8 +30,8 @@ nonisolated enum OperationMode: String, CaseIterable, Identifiable, Codable, Sen
     /// The localized title of the mode.
     var localized: LocalizedStringKey {
         switch self {
-        case .inline: "Native Menu Bar"
-        case .floatingLive: "Live Preview Bar"
+        case .inline: "Native Bar"
+        case .floatingLive: "Floating Bar"
         }
     }
 
@@ -62,9 +62,9 @@ nonisolated enum OperationMode: String, CaseIterable, Identifiable, Codable, Sen
     var detailDescription: LocalizedStringKey {
         switch self {
         case .inline:
-            "Natively expands and collapses items directly on the top menu bar. Items to the left of the xBar divider are hidden; items to the right remain visible. Zero screen recording and ultra-low battery impact."
+            "Expands on the menu bar with zero extra windows."
         case .floatingLive:
-            "Pops up a floating dropdown bar with 1:1 live-captured menu bar icons (e.g. dynamic battery, network speeds). Requires Screen Recording permission."
+            "Shows a floating dropdown bar with live-captured icons."
         }
     }
 }

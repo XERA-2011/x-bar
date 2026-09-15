@@ -34,12 +34,12 @@ struct AboutSettingsPane: View {
             }
             IceSection("Updates") {
                 HStack {
-                    Text("Check for new releases on GitHub")
+                    Text("Check for updates on GitHub")
                     Spacer()
                     Button {
                         updatesManager.checkForUpdates()
                     } label: {
-                        Label("Check for Updates", systemImage: "arrow.clockwise")
+                        Label("Check Now", systemImage: "arrow.clockwise")
                     }
                     .buttonStyle(.settingsGlass)
                 }

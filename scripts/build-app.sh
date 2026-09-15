@@ -114,6 +114,9 @@ fi
 cp -p "${SOURCE_DIR}/Resources/Acknowledgements.md" "${RESOURCES}/"
 cp -p "${SOURCE_DIR}/Resources/Localizable.xcstrings" "${RESOURCES}/"
 
+# Compile Localizable.xcstrings into per-language .lproj/Localizable.strings
+python3 "${ROOT_DIR}/scripts/compile-xcstrings.py" "${SOURCE_DIR}/Resources/Localizable.xcstrings" "${RESOURCES}"
+
 
 # Copy all png assets directly into Resources for NSImage(named:) lookup
 while IFS= read -r png; do

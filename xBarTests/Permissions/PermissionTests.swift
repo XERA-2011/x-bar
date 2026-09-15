@@ -62,7 +62,7 @@ struct PermissionTests {
             }
         }
 
-        #expect(requestCount == 2)
+        #expect(requestCount == 1)
         #expect(openedSettingsURLs == [settingsURL])
         #expect(permission.hasPermission)
     }
@@ -98,9 +98,9 @@ struct PermissionTests {
         #expect(openedSettingsURLs.isEmpty)
         #expect(permission.hasAttemptedRequest)
 
-        // Second attempt: opens System Settings directly.
+        // Second attempt: opens System Settings directly without re-prompting.
         permission.performRequest()
-        #expect(requestCount == 2)
+        #expect(requestCount == 1)
         #expect(openedSettingsURLs == [settingsURL])
 
         // Resetting attempt state allows another prompt attempt without opening settings.
@@ -108,7 +108,7 @@ struct PermissionTests {
         #expect(!permission.hasAttemptedRequest)
 
         permission.performRequest()
-        #expect(requestCount == 3)
+        #expect(requestCount == 2)
         #expect(openedSettingsURLs == [settingsURL]) // Still just the one from earlier
         #expect(permission.hasAttemptedRequest)
     }

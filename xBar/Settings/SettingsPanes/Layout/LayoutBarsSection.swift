@@ -46,11 +46,7 @@ struct LayoutBarsSection: View {
         } content: {
             layoutBars
         } footer: {
-            // Native grouped Section footer beneath the bars. Interpolated so
-            // the four localized strings flow as one wrapping paragraph
-            // instead of four fixed lines (Text + is deprecated on macOS 26;
-            // each inner Text keeps its own localization key).
-            Text("\(Text("Drag to arrange your menu bar items into different sections.")) \(Text("Move the New Items badge to choose where newly detected items will appear.")) \(Text("Items can also be arranged by ⌘ Command + dragging them in the menu bar.")) \(Text("Click an item to open it. Hidden items are temporarily revealed."))")
+            Text("Drag items to arrange sections, or ⌘-drag in the menu bar.")
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .onReceive(
@@ -180,16 +176,16 @@ struct LayoutBarsSection: View {
                     .foregroundStyle(.orange)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Screen Recording Permission Required")
+                    Text("Screen Recording Required")
                         .font(.headline)
-                    Text("macOS requires Screen Recording to preview and arrange menu bar icons.")
+                    Text("Required to preview and arrange icons.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
 
                 Spacer()
 
-                Button("Grant Permission") {
+                Button("Grant") {
                     appState.permissions.screenRecording.performRequest()
                 }
                 .buttonStyle(.borderedProminent)
@@ -202,7 +198,7 @@ struct LayoutBarsSection: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color.accentColor)
 
-                Text("Alternative: Hold **⌘ Command** and drag items directly on your physical menu bar (no permission needed).")
+                Text("Or hold **⌘** and drag items directly on the menu bar.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 

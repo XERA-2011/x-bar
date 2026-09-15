@@ -142,9 +142,10 @@ class Permission: Identifiable {
         // Restart it for every explicit request so later grants are observed.
         configureCancellables()
         if hasAttemptedRequest || openSettingsImmediately {
-            request()
             if let settingsURL {
                 _ = openSettings(settingsURL)
+            } else {
+                request()
             }
             hasAttemptedRequest = true
         } else {
@@ -177,7 +178,7 @@ final class AccessibilityPermission: Permission {
             iconName: "accessibility",
             iconColor: .blue,
             details: [
-                String(localized: "Detect the menu bar items on your Mac and where they're positioned."),
+                String(localized: "Detect and arrange menu bar items."),
                 String(localized: "Move menu bar items to rearrange or hide them."),
                 String(localized: "Click menu bar items on your behalf, such as when using the search bar."),
             ],
@@ -208,7 +209,7 @@ final class ScreenRecordingPermission: Permission {
             iconName: "record.circle",
             iconColor: .red,
             details: [
-                String(localized: "Show live previews of your menu bar items."),
+                String(localized: "Live previews in floating bar."),
                 String(localized: "Sample colors from the menu bar to adjust its tint and appearance."),
                 String(localized: "Find menu bar items visually when searching."),
             ],

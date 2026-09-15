@@ -70,7 +70,7 @@ struct SettingsView: View {
 
         return List(selection: selection) {
             Section {
-                ForEach(SettingsNavigationIdentifier.allCases) { identifier in
+                ForEach(SettingsNavigationIdentifier.allCases, id: \.self) { identifier in
                     Label {
                         Text(identifier.localized)
                     } icon: {

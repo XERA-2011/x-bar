@@ -12,7 +12,6 @@ import Cocoa
 class LayoutBarArrangedView: NSView {
     enum Kind {
         case item(MenuBarItem)
-        case newItemsBadge
     }
 
     /// Temporary information retained while dragging between layout containers.
@@ -52,13 +51,6 @@ class LayoutBarArrangedView: NSView {
 
     var kind: Kind {
         fatalError("Subclasses must override kind")
-    }
-
-    var isNewItemsBadge: Bool {
-        if case .newItemsBadge = kind {
-            return true
-        }
-        return false
     }
 
     func draggingImage() -> NSImage? {
@@ -140,13 +132,6 @@ extension LayoutBarArrangedView: NSDraggingSource {
             currentContainer?.resumeArrangedViewUpdatesWithoutAnimation()
             sourceContainer?.resumeArrangedViewUpdatesWithoutAnimation()
             frozenContainer?.resumeArrangedViewUpdatesWithoutAnimation()
-        }
-
-        if isNewItemsBadge {
-            sourceContainer?.resumeArrangedViewUpdatesWithoutAnimation()
-            if let appState = sourceContainer?.appState {
-                sourceContainer?.setArrangedViews(items: appState.itemManager.itemCache.managedItems(for: sourceContainer?.section ?? .hidden))
-            }
         }
 
         if operation != [], !hasContainer {
