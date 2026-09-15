@@ -658,10 +658,7 @@ final class MenuBarItemImageCache: @unchecked Sendable {
         guard let appState, ScreenCapture.cachedCheckPermissions() else {
             return false
         }
-        guard appState.settings.general.operationMode == .floatingLive else {
-            return false
-        }
-        if nav.isIceBarPresented {
+        if appState.settings.general.operationMode == .floatingLive, nav.isIceBarPresented {
             return true
         }
 

@@ -27,14 +27,7 @@ struct MenuBarLayoutSettingsPane: View {
                 operationModeSection
 
                 if appState.permissions.accessibility.hasPermission {
-                    switch appState.settings.general.operationMode {
-                    case .inline:
-                        nativeInlineInstructionsSection
-                    case .floatingLive:
-                        if appState.permissions.screenRecording.hasPermission {
-                            LayoutBarsSection(itemManager: itemManager)
-                        }
-                    }
+                    LayoutBarsSection(itemManager: itemManager)
                 }
             }
             .animation(.easeInOut(duration: 0.25), value: appState.permissions.accessibility.hasPermission)
@@ -42,32 +35,32 @@ struct MenuBarLayoutSettingsPane: View {
             .animation(.easeInOut(duration: 0.25), value: appState.settings.general.operationMode)
             .onAppear {
                 if appState.permissions.accessibility.hasPermission,
-                   appState.settings.general.operationMode == .floatingLive {
+                   appState.permissions.screenRecording.hasPermission {
                     appState.imageCache.markSettingsPaneOpened()
                 }
             }
             .onChange(of: appState.permissions.accessibility.hasPermission) { _, hasPermission in
-                if hasPermission, appState.settings.general.operationMode == .floatingLive {
+                if hasPermission, appState.permissions.screenRecording.hasPermission {
                     appState.imageCache.markSettingsPaneOpened()
+                } else if !hasPermission {
+                    appState.imageCache.markSettingsPaneClosed()
                 }
             }
             .onChange(of: appState.permissions.screenRecording.hasPermission) { _, hasPermission in
-                if !hasPermission, appState.settings.general.operationMode == .floatingLive {
-                    withAnimation {
-                        appState.settings.general.operationMode = .inline
-                    }
-                }
-            }
-            .onChange(of: appState.settings.general.operationMode) { _, mode in
-                appState.menuBarManager.iceBarPanel.close()
-                appState.menuBarManager.updateControlItemStates()
-                if mode == .floatingLive,
-                   appState.permissions.accessibility.hasPermission,
-                   ScreenCapture.cachedCheckPermissions() {
+                if hasPermission, appState.permissions.accessibility.hasPermission {
                     appState.imageCache.markSettingsPaneOpened()
                 } else {
                     appState.imageCache.markSettingsPaneClosed()
+                    if appState.settings.general.operationMode == .floatingLive {
+                        withAnimation {
+                            appState.settings.general.operationMode = .inline
+                        }
+                    }
                 }
+            }
+            .onChange(of: appState.settings.general.operationMode) { _, _ in
+                appState.menuBarManager.iceBarPanel.close()
+                appState.menuBarManager.updateControlItemStates()
             }
             .onDisappear {
                 appState.imageCache.markSettingsPaneClosed()
@@ -136,7 +129,7 @@ struct MenuBarLayoutSettingsPane: View {
             }
         } label: {
             HStack(spacing: 8) {
-                Image(systemName: mode.iconName)
+                Image(systemName: mode.iconName(isSelected: isSelected))
                     .font(.body)
 
                 Text(mode.localized)
@@ -224,57 +217,6 @@ struct MenuBarLayoutSettingsPane: View {
         }
     }
 
-    private var nativeInlineInstructionsSection: some View {
-        IceSection {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .top, spacing: 14) {
-                    Image(systemName: "menubar.dock.rectangle")
-                        .font(.system(size: 26))
-                        .foregroundStyle(Color.accentColor)
-                        .frame(width: 32, height: 32)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Native Menu Bar Management")
-                            .font(.headline)
-
-                        Text("Items are managed and collapsed directly on your physical menu bar at the top of the screen.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Divider()
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Label {
-                        Text("Hold **⌘ Command** and drag any item on your menu bar to rearrange it.")
-                    } icon: {
-                        Image(systemName: "command")
-                            .foregroundStyle(Color.accentColor)
-                    }
-
-                    Label {
-                        Text("Drag items to the **left** of the \(Constants.displayName) divider to hide them, or to the **right** to keep them visible.")
-                    } icon: {
-                        Image(systemName: "arrow.left.and.right")
-                            .foregroundStyle(Color.accentColor)
-                    }
-
-                    Label {
-                        Text("Click the **\(Constants.displayName) icon** in your menu bar anytime to expand or collapse hidden items directly on the menu bar.")
-                    } icon: {
-                        Image(systemName: "eye")
-                            .foregroundStyle(Color.accentColor)
-                    }
-                }
-                .font(.callout)
-            }
-            .padding(.vertical, 4)
-        } footer: {
-            Text("Tip: In this mode, no floating bar will pop up. Hidden items smoothly slide into view directly on the top menu bar.")
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
 
     private var cannotArrange: some View {
         Text("\(Constants.displayName) cannot arrange menu bar items in automatically hidden menu bars.")

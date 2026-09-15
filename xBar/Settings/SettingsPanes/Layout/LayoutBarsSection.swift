@@ -86,16 +86,22 @@ struct LayoutBarsSection: View {
         return (name?.isEmpty ?? true) ? nil : name
     }
 
+    private var hasScreenRecording: Bool {
+        appState.permissions.screenRecording.hasPermission
+    }
+
     private var layoutBars: some View {
         VStack(spacing: 20) {
             layoutBar(for: .visible)
             layoutBar(for: .hidden)
         }
-        .opacity(hasItems ? 1 : 0.75)
-        .blur(radius: hasItems ? 0 : 5)
-        .allowsHitTesting(hasItems)
+        .opacity(!hasScreenRecording ? 0.35 : (hasItems ? 1 : 0.75))
+        .blur(radius: !hasScreenRecording ? 4 : (hasItems ? 0 : 5))
+        .allowsHitTesting(hasScreenRecording && hasItems)
         .overlay {
-            if !hasItems {
+            if !hasScreenRecording {
+                screenRecordingPermissionOverlay
+            } else if !hasItems {
                 VStack(spacing: 8) {
                     if loadDeadlineReached {
                         VStack(spacing: 4) {
@@ -112,6 +118,14 @@ struct LayoutBarsSection: View {
                         Text("Loading menu bar items…")
                         ProgressView()
                     }
+                }
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: hasScreenRecording)
+        .onChange(of: appState.permissions.screenRecording.hasPermission) { _, hasPermission in
+            if hasPermission {
+                Task {
+                    await preloadLayoutCaches(includingImages: true)
                 }
             }
         }
@@ -156,6 +170,57 @@ struct LayoutBarsSection: View {
                 LayoutBar(section: name)
             }
         }
+    }
+
+    private var screenRecordingPermissionOverlay: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: "lock.shield.fill")
+                    .font(.system(size: 26))
+                    .foregroundStyle(.orange)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Screen Recording Permission Required")
+                        .font(.headline)
+                    Text("macOS requires Screen Recording to preview and arrange menu bar icons.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Button("Grant Permission") {
+                    appState.permissions.screenRecording.performRequest()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+
+            Divider()
+
+            HStack(spacing: 8) {
+                Image(systemName: "command")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.accentColor)
+
+                Text("Alternative: Hold **⌘ Command** and drag items directly on your physical menu bar (no permission needed).")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(.regularMaterial)
+                .shadow(color: .black.opacity(0.12), radius: 8, y: 3)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(Color.primary.opacity(0.12), lineWidth: 1)
+        }
+        .padding(.horizontal, 8)
     }
 
     private func preloadLayoutCaches(includingImages: Bool) async {

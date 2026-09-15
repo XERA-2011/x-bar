@@ -28,6 +28,7 @@ struct GeneralSettingsPane: View {
                 emptyAreaOptions
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: settings.emptyAreaAction)
         .onAppear {
             maxSliderLabelWidth = 0
         }
@@ -53,12 +54,26 @@ struct GeneralSettingsPane: View {
 
     @ViewBuilder
     private var emptyAreaOptions: some View {
-        Toggle("Show on click", isOn: $settings.showOnClick)
-        Toggle("Show on hover", isOn: $settings.showOnHover)
-        if settings.showOnHover {
-            showOnHoverDelay
+        IceMenu("Trigger action") {
+            Picker("Trigger action", selection: $settings.emptyAreaAction) {
+                ForEach(GeneralSettings.EmptyAreaAction.allCases) { action in
+                    Label(action.localized, systemImage: action.iconName)
+                        .tag(action)
+                }
+            }
+            .pickerStyle(.inline)
+            .labelsHidden()
+        } title: {
+            HStack(spacing: 6) {
+                Image(systemName: settings.emptyAreaAction.iconName)
+                Text(settings.emptyAreaAction.shortTitle)
+            }
         }
-        Toggle("Show on scroll", isOn: $settings.showOnScroll)
+
+        if settings.emptyAreaAction == .hover {
+            showOnHoverDelay
+                .transition(.opacity.combined(with: .move(edge: .top)))
+        }
     }
 
     private var showOnHoverDelay: some View {

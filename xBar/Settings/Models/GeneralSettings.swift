@@ -145,6 +145,78 @@ final class GeneralSettings {
         }
     }
 
+    /// An action that reveals hidden items when interacting with an empty area of the menu bar.
+    enum EmptyAreaAction: String, CaseIterable, Identifiable, Codable, Sendable {
+        case none = "none"
+        case click = "click"
+        case hover = "hover"
+        case scroll = "scroll"
+
+        var id: String { rawValue }
+
+        var localized: LocalizedStringKey {
+            switch self {
+            case .none: "None"
+            case .click: "Show on click"
+            case .hover: "Show on hover"
+            case .scroll: "Show on scroll"
+            }
+        }
+
+        var shortTitle: LocalizedStringKey {
+            switch self {
+            case .none: "None"
+            case .click: "Click"
+            case .hover: "Hover"
+            case .scroll: "Scroll"
+            }
+        }
+
+        var iconName: String {
+            switch self {
+            case .none: "slash.circle"
+            case .click: "cursorarrow.click.2"
+            case .hover: "cursorarrow.motionlines"
+            case .scroll: "arrow.up.and.down.circle"
+            }
+        }
+    }
+
+    /// The single-choice action to perform when interacting with an empty area of the menu bar.
+    var emptyAreaAction: EmptyAreaAction {
+        get {
+            if showOnHover {
+                return .hover
+            } else if showOnClick {
+                return .click
+            } else if showOnScroll {
+                return .scroll
+            } else {
+                return .none
+            }
+        }
+        set {
+            switch newValue {
+            case .none:
+                showOnClick = false
+                showOnHover = false
+                showOnScroll = false
+            case .click:
+                showOnClick = true
+                showOnHover = false
+                showOnScroll = false
+            case .hover:
+                showOnClick = false
+                showOnHover = true
+                showOnScroll = false
+            case .scroll:
+                showOnClick = false
+                showOnHover = false
+                showOnScroll = true
+            }
+        }
+    }
+
     // The offset to apply to the menu bar item spacing and padding.
 
     /// A Boolean value that indicates whether the hidden section

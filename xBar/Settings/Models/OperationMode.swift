@@ -35,12 +35,19 @@ nonisolated enum OperationMode: String, CaseIterable, Identifiable, Codable, Sen
         }
     }
 
+    /// The SF Symbol representing the mode, optionally adjusted for selection state.
+    func iconName(isSelected: Bool = true) -> String {
+        switch self {
+        case .inline:
+            return "rectangle.topthird.inset.filled"
+        case .floatingLive:
+            return isSelected ? "rectangle.stack.fill" : "rectangle.stack"
+        }
+    }
+
     /// The SF Symbol representing the mode.
     var iconName: String {
-        switch self {
-        case .inline: "menubar.dock.rectangle"
-        case .floatingLive: "sparkles"
-        }
+        iconName(isSelected: true)
     }
 
     /// Whether this mode requires Screen Recording permission.
