@@ -12,6 +12,7 @@
   <img src="https://img.shields.io/badge/platform-macOS%2014.0%2B-blue?style=flat-square" alt="Platform: macOS 14.0+" />
   <img src="https://img.shields.io/badge/Swift-6.0-orange?style=flat-square" alt="Swift 6.0" />
   <img src="https://img.shields.io/badge/license-GPL--3.0-green?style=flat-square" alt="License: GPL-3.0" />
+  <a href="https://github.com/XERA-2011/sponsor"><img src="https://img.shields.io/badge/Sponsor-❤️-ff69b4.svg?style=flat-square" alt="Sponsor" /></a>
 </p>
 
 ---
@@ -74,6 +75,10 @@ xBar builds upon the ideas and pioneering work of the open-source community:
 
 - **[jordanbaird/Ice](https://github.com/jordanbaird/Ice)** — The powerful menu bar manager for macOS.
 - **[thaw-app/Thaw](https://github.com/thaw-app/Thaw)** — Modern macOS menu bar enhancement suite.
+
+## ❤️ Support & Sponsor
+
+If you find xBar helpful, consider [sponsoring the project](https://github.com/XERA-2011/sponsor). Your support helps keep the project maintained!
 
 ---
 
