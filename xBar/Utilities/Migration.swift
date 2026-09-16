@@ -12,7 +12,7 @@ import Foundation
 /// the current format.
 ///
 /// Migrations for older releases used to live here.
-/// XMenuBar reads its own defaults domain, `com.xera.xmenubar`.
+/// xBar reads its own defaults domain, `com.xera.xbar`.
 @MainActor
 struct MigrationManager {
     private let diagLog = DiagLog(category: "Migration")

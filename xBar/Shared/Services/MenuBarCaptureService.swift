@@ -16,14 +16,6 @@ import Foundation
 /// exists so that leak can be reclaimed by exiting the helper. Visible-section
 /// icons stay on ScreenCaptureKit in the app; Always Hidden stays at 1 fps.
 nonisolated enum MenuBarCaptureService {
-    static let name = "com.xera.xmenubar.MenuBarCaptureService"
-
-    /// Exit after this many successful SkyLight composites.
-    ///
-    /// Commit `0e045faf` measured ~168 B per leaked dictionary. 1,800 calls is
-    /// about 60 s at 30 fps and ~300 KB of helper growth before recycle.
-    static let recycleAfterCaptureCount = 1_800
-
     static let maxWindowCount = 64
     static let maxBytesPerFrame = 4 * 1_024 * 1_024
     static let minAlwaysHiddenInterval: TimeInterval = 1
@@ -35,13 +27,6 @@ nonisolated enum MenuBarCaptureService {
 }
 
 nonisolated extension MenuBarCaptureService {
-    struct CaptureBatchRequest: Codable, Equatable {
-        var requestID: UInt64
-        var windowIDs: [CGWindowID]
-        var optionRawValue: UInt32
-        var expectedScale: Double
-    }
-
     struct Frame: Codable, Equatable {
         var windowID: CGWindowID
         var width: Int
@@ -51,35 +36,6 @@ nonisolated extension MenuBarCaptureService {
         var pixels: Data
     }
 
-    struct CaptureBatchResponse: Codable, Equatable {
-        var requestID: UInt64
-        var instanceID: UInt64
-        var frames: [Frame]
-    }
-
-    enum Request: Codable, Equatable {
-        case start
-        /// Points the helper's diagnostic logger at `filePath`, or turns its
-        /// file logging off when `nil`. Sent at startup, and again whenever the
-        /// helper is out of date — a replaced session, or a log rotation.
-        ///
-        /// `rotationPolicy` carries the app's retention settings, so the helper
-        /// prunes the shared log directory by the same rules rather than by its
-        /// own defaults.
-        case configureLogging(filePath: String?, rotationPolicy: DiagnosticLogger.RotationPolicy?)
-        case captureBatch(CaptureBatchRequest)
-        case recycle
-    }
-
-    enum Response: Codable, Equatable {
-        case start
-        case configureLogging
-        case captureBatch(CaptureBatchResponse)
-        case recycle
-    }
-}
-
-nonisolated extension MenuBarCaptureService {
     /// Drops zeros, duplicates, non-members, and anything past ``maxWindowCount``.
     static func validatedWindowIDs(
         _ ids: [CGWindowID],
@@ -111,23 +67,6 @@ nonisolated extension MenuBarCaptureService {
         let expected = bytesPerRow * height
         guard pixelCount >= expected, expected <= maxBytesPerFrame else { return false }
         return true
-    }
-
-    static func shouldRecycle(
-        captureCount: Int,
-        budget: Int = recycleAfterCaptureCount
-    ) -> Bool {
-        captureCount >= budget
-    }
-
-    static func acceptedResponse(
-        requestID: UInt64,
-        response: Response
-    ) -> CaptureBatchResponse? {
-        guard case let .captureBatch(batch) = response, batch.requestID == requestID else {
-            return nil
-        }
-        return batch
     }
 
     static func encodeBGRA(_ image: CGImage) -> (pixels: Data, bytesPerRow: Int)? {

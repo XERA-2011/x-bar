@@ -180,7 +180,7 @@ final class AccessibilityPermission: Permission {
             details: [
                 String(localized: "Detect and arrange menu bar items."),
                 String(localized: "Move menu bar items to rearrange or hide them."),
-                String(localized: "Click menu bar items on your behalf, such as when using the search bar."),
+                String(localized: "Route clicks to items in the floating bar."),
             ],
             isRequired: true,
             // Keep an explicit settings URL so every click can recover the
@@ -199,8 +199,8 @@ final class AccessibilityPermission: Permission {
 
 // MARK: - ScreenRecordingPermission
 
-/// The Screen Recording permission, used for sampling menu bar colors,
-/// previewing menu bar items, and visual search. Optional — xBar can run in
+/// The Screen Recording permission, used for sampling menu bar colors
+/// and previewing menu bar items. Optional — xBar can run in
 /// a limited mode without it.
 final class ScreenRecordingPermission: Permission {
     init() {
@@ -211,7 +211,6 @@ final class ScreenRecordingPermission: Permission {
             details: [
                 String(localized: "Live previews in floating bar."),
                 String(localized: "Sample colors from the menu bar to adjust its tint and appearance."),
-                String(localized: "Find menu bar items visually when searching."),
             ],
             isRequired: false,
             settingsURL: URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"),

@@ -14,7 +14,7 @@ nonisolated enum Defaults {
     ///
     /// Production never assigns this; it stays `.standard` for the life of
     /// the process. It exists so tests can point the whole `Defaults` facade
-    /// at a scratch suite instead of the user's real `com.xera.xmenubar`
+    /// at a scratch suite instead of the user's real `com.xera.xbar`
     /// domain. Without it, exercising anything that persists a setting
     /// rewrites the defaults of whoever is running the tests, and the suite
     /// has to defend itself with per-key snapshot/restore that is not safe
@@ -491,7 +491,7 @@ nonisolated extension Defaults {
         /// logs, not yet confirmed on a live bar, so it is opt-in.
         ///
         /// Enable with:
-        ///   defaults write com.xera.xmenubar faithfulDragMoves -bool YES
+        ///   defaults write com.xera.xbar faithfulDragMoves -bool YES
         ///
         /// Hidden diagnostic flag; not exposed in Settings. Default: false.
         case faithfulDragMoves = "faithfulDragMoves"

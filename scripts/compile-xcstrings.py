@@ -16,34 +16,20 @@ def compile_xcstrings(xcstrings_path, out_dir):
 
     strings = data.get("strings", {})
     source_lang = data.get("sourceLanguage", "en")
-    by_lang = {}
-
+    en_strings = {}
     for key, item in strings.items():
-        localizations = item.get("localizations", {})
-        if source_lang not in by_lang:
-            by_lang[source_lang] = {}
-        by_lang[source_lang][key] = key
+        loc_en = item.get("localizations", {}).get("en", {})
+        val = loc_en.get("stringUnit", {}).get("value") if isinstance(loc_en, dict) else None
+        en_strings[key] = val if val is not None else key
 
-        for lang, loc in localizations.items():
-            if lang not in by_lang:
-                by_lang[lang] = {}
-            val = None
-            if "stringUnit" in loc and "value" in loc["stringUnit"]:
-                val = loc["stringUnit"]["value"]
-            if val is not None:
-                by_lang[lang][key] = val
+    lproj = os.path.join(out_dir, "en.lproj")
+    os.makedirs(lproj, exist_ok=True)
+    strings_file = os.path.join(lproj, "Localizable.strings")
+    with open(strings_file, "w", encoding="utf-8") as out:
+        for k, v in sorted(en_strings.items()):
+            out.write(f"\"{escape_str(k)}\" = \"{escape_str(v)}\";\n")
 
-    for lang, trans_dict in by_lang.items():
-        if lang != "en":
-            continue
-        lproj = os.path.join(out_dir, f"{lang}.lproj")
-        os.makedirs(lproj, exist_ok=True)
-        strings_file = os.path.join(lproj, "Localizable.strings")
-        with open(strings_file, "w", encoding="utf-8") as out:
-            for k, v in trans_dict.items():
-                out.write(f"\"{escape_str(k)}\" = \"{escape_str(v)}\";\n")
-
-    print(f"Compiled English localization from {os.path.basename(xcstrings_path)} into {out_dir}")
+    print(f"Compiled English localization ({len(en_strings)} keys) into {lproj}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

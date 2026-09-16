@@ -75,17 +75,19 @@ struct IceIconPicker: View {
         }
 
         if case .custom = settings.iceIcon.name {
-            Toggle("Custom icon uses dynamic appearance", isOn: $settings.customIceIconIsTemplate)
-                .annotation {
-                    Text(
-                        """
-                        Display the icon as a monochrome image that dynamically adjusts to match \
-                        the menu bar's appearance. This setting removes all color from the icon, \
-                        but ensures consistent rendering with both light and dark backgrounds.
-                        """
-                    )
-                    .padding(.trailing, 50)
-                }
+            VStack(alignment: .leading, spacing: 4) {
+                Toggle("Custom icon uses dynamic appearance", isOn: $settings.customIceIconIsTemplate)
+                Text(
+                    """
+                    Display the icon as a monochrome image that dynamically adjusts to match \
+                    the menu bar's appearance. This setting removes all color from the icon, \
+                    but ensures consistent rendering with both light and dark backgrounds.
+                    """
+                )
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .padding(.trailing, 50)
+            }
         }
     }
 
