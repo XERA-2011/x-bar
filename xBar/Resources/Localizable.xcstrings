@@ -931,17 +931,6 @@
         }
       }
     },
-    "Automatically download and install updates": {
-      "comment": "A toggle label that allows the user to enable or disable automatic update checking.",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Automatically download and install updates"
-          }
-        }
-      }
-    },
     "Click": {
       "localizations": {
         "en": {
@@ -1039,17 +1028,6 @@
         }
       }
     },
-    "Check Automatically": {
-      "comment": "A button that enables automatic update checking.",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Check Automatically"
-          }
-        }
-      }
-    },
     "Check for Updates": {
       "comment": "A button that triggers a check for updates.",
       "localizations": {
@@ -1057,17 +1035,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Check for Updates"
-          }
-        }
-      }
-    },
-    "Check for updates automatically?": {
-      "comment": "A title for a sheet that lets a user decide whether or not to have \\(Constants.displayName) automatically check for updates.",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Check for updates automatically?"
           }
         }
       }
@@ -1664,17 +1631,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Displays"
-          }
-        }
-      }
-    },
-    "Don't Check": {
-      "comment": "A button that disables automatic update checking.",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Don't Check"
           }
         }
       }

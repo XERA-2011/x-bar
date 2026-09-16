@@ -71,7 +71,6 @@ $(SRCROOT)/xBar/Onboarding/OnboardingPermissionsView.swift
 $(SRCROOT)/xBar/Onboarding/OnboardingView.swift
 $(SRCROOT)/xBar/Permissions/AppPermissions.swift
 $(SRCROOT)/xBar/Permissions/Permission.swift
-$(SRCROOT)/xBar/Permissions/PermissionsView.swift
 $(SRCROOT)/xBar/Permissions/PermissionsWindow.swift
 $(SRCROOT)/xBar/Settings/Models/AdvancedSettings.swift
 $(SRCROOT)/xBar/Settings/Models/AppSettings.swift
@@ -109,7 +108,6 @@ $(SRCROOT)/xBar/Shared/Utilities/SourcePIDNegativeCachePolicy.swift
 $(SRCROOT)/xBar/Shared/Utilities/WindowInfo.swift
 $(SRCROOT)/xBar/UI/IceUI/IceForm.swift
 $(SRCROOT)/xBar/UI/IceUI/IceMenu.swift
-$(SRCROOT)/xBar/UI/IceUI/IcePicker.swift
 $(SRCROOT)/xBar/UI/IceUI/IceSection.swift
 $(SRCROOT)/xBar/UI/IceUI/IceSlider.swift
 $(SRCROOT)/xBar/UI/IceUI/IceWindow.swift
