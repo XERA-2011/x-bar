@@ -34,17 +34,29 @@ trap 'rm -rf "${STAGING_DIR}"' EXIT
 cp -R "${APP_BUNDLE}" "${STAGING_DIR}/xBar.app"
 ln -s /Applications "${STAGING_DIR}/Applications"
 
-if command -v create-dmg >/dev/null 2>&1; then
+CREATE_DMG="${ROOT_DIR}/tools/create-dmg/create-dmg"
+BG_IMAGE="${ROOT_DIR}/assets/dmg-background@2x.png"
+
+if [[ -x "${CREATE_DMG}" ]] || command -v create-dmg >/dev/null 2>&1; then
+    CMD="${CREATE_DMG}"
+    if [[ ! -x "${CMD}" ]]; then
+        CMD="create-dmg"
+    fi
     echo "==> Using create-dmg for styled disk image..."
-    create-dmg \
+    BG_ARGS=()
+    if [[ -f "${BG_IMAGE}" ]]; then
+        BG_ARGS=(--background "${BG_IMAGE}")
+    fi
+    "${CMD}" \
         --volname "xBar" \
+        "${BG_ARGS[@]}" \
         --window-pos 200 120 \
-        --window-size 540 380 \
+        --window-size 582 300 \
         --icon-size 100 \
-        --icon "xBar.app" 140 180 \
         --hide-extension "xBar.app" \
-        --app-drop-link 400 180 \
-        --no-internet-enable \
+        --icon "xBar.app" 150 150 \
+        --icon "Applications" 436 150 \
+        --hdiutil-retries 10 \
         "${DMG_PATH}" \
         "${STAGING_DIR}" || {
             echo "Warning: create-dmg failed, falling back to native hdiutil..."
@@ -52,7 +64,7 @@ if command -v create-dmg >/dev/null 2>&1; then
             hdiutil create -volname "xBar" -srcfolder "${STAGING_DIR}" -ov -format UDZO "${DMG_PATH}"
         }
 else
-    echo "==> create-dmg not installed; using native macOS hdiutil..."
+    echo "==> create-dmg not found; using native macOS hdiutil..."
     hdiutil create -volname "xBar" -srcfolder "${STAGING_DIR}" -ov -format UDZO "${DMG_PATH}"
 fi
 
