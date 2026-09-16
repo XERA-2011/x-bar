@@ -218,7 +218,7 @@ extension MenuBarItemManager {
                     return lhsDistance < rhsDistance
                 }),
                 let bestFrame = AXHelpers.frame(for: best),
-                bestFrame.center.distance(to: itemCenter) <= 10
+                bestFrame.center.distance(to: itemCenter) <= 25
             else {
                 return false
             }

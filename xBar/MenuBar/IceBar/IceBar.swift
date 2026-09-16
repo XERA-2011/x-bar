@@ -731,54 +731,43 @@ private struct IceBarItemView: View {
             let clickStartTime = Date.now
             IceBarItemView.diagLog.debug("leftClick: user clicked \(item.logString)")
             let panel = menuBarManager.iceBarPanel
-            menuBarManager.section(withName: section)?.hide()
+            panel.close()
             Task {
-                // Wait until the IceBar panel is fully closed before checking
-                // item visibility. Uses KVO on isVisible so we resume as soon
-                // as the panel hides rather than busy-polling.
                 await panel.waitUntilClosed(timeout: .milliseconds(200))
+                // If item is already on-screen, activate via AX directly
                 if let liveItem = await liveOnScreenItem(matching: item, on: displayID) {
-                    do {
-                        try await itemManager.click(item: liveItem, with: .left)
+                    if itemManager.pressItemViaAccessibility(liveItem) {
                         let duration = Date.now.timeIntervalSince(clickStartTime)
-                        IceBarItemView.diagLog.debug("leftClick: ✓ completed in \(Int(duration * 1000))ms (on-screen path)")
-                    } catch {
-                        // Surfacing this matters: a swallowed error here is a
-                        // user click that silently does nothing.
-                        IceBarItemView.diagLog.error("leftClick: failed for \(item.logString): \(error)")
+                        IceBarItemView.diagLog.debug("leftClick: ✓ AX activated in \(Int(duration * 1000))ms (on-screen)")
+                        return
                     }
-                } else {
-                    // temporarilyShow handles move, click, and fallback click
-                    // internally so that shownInterfaceWindow is always captured
-                    // regardless of which click attempt succeeds.
-                    let result = await itemManager.temporarilyShow(item: item, clickingWith: .left, on: displayID, fastPath: true)
-                    let duration = Date.now.timeIntervalSince(clickStartTime)
-                    IceBarItemView.diagLog.debug("leftClick: completed in \(Int(duration * 1000))ms (temp-show path, result=\(result))")
                 }
+                // Unhide the section inline on the menu bar temporarily (zero mouse events, zero cursor warp)
+                if let targetSection = menuBarManager.section(withName: section) ?? menuBarManager.section(withName: .hidden) {
+                    targetSection.showInlineTemporarily(interval: 5)
+                }
+                // Allow a brief moment for WindowServer to reflow the status items onto the screen
+                try? await Task.sleep(for: .milliseconds(80))
+                // Activate via Accessibility now that the item has valid on-screen bounds
+                let liveItem = await liveOnScreenItem(matching: item, on: displayID) ?? item
+                let success = itemManager.pressItemViaAccessibility(liveItem)
+                let duration = Date.now.timeIntervalSince(clickStartTime)
+                IceBarItemView.diagLog.debug("leftClick: AX activation success=\(success) in \(Int(duration * 1000))ms")
             }
         }
     }
 
     private var rightClickAction: () -> Void {
-        return { [weak itemManager, weak menuBarManager] in
-            guard let itemManager, let menuBarManager else {
+        return { [weak menuBarManager] in
+            guard let menuBarManager else {
                 return
             }
             let panel = menuBarManager.iceBarPanel
-            menuBarManager.section(withName: section)?.hide()
+            panel.close()
             Task {
                 await panel.waitUntilClosed(timeout: .milliseconds(200))
-                if let liveItem = await liveOnScreenItem(matching: item, on: displayID) {
-                    do {
-                        try await itemManager.click(item: liveItem, with: .right)
-                    } catch {
-                        // Surfacing this matters: a swallowed error here is a
-                        // user click that silently does nothing.
-                        IceBarItemView.diagLog.error("rightClick: failed for \(item.logString): \(error)")
-                    }
-                } else {
-                    let result = await itemManager.temporarilyShow(item: item, clickingWith: .right, on: displayID, fastPath: true)
-                    IceBarItemView.diagLog.debug("rightClick: temp-show result=\(result)")
+                if let targetSection = menuBarManager.section(withName: section) ?? menuBarManager.section(withName: .hidden) {
+                    targetSection.showInlineTemporarily(interval: 5)
                 }
             }
         }

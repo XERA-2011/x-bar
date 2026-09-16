@@ -82,7 +82,12 @@ nonisolated enum AXHelpers {
             try element.performAction(.press)
             return true
         } catch {
-            return false
+            do {
+                try element.performAction(.showMenu)
+                return true
+            } catch {
+                return false
+            }
         }
     }
 }

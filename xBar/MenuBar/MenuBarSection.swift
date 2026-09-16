@@ -292,6 +292,37 @@ final class MenuBarSection {
         stopRehideChecks()
     }
 
+    /// Expands the section inline on the menu bar temporarily without showing IceBar,
+    /// and schedules an auto-rehide after `interval` seconds (or when user finishes).
+    func showInlineTemporarily(interval: TimeInterval = 5) {
+        guard let menuBarManager else { return }
+
+        menuBarManager.updateLastShowTimestamp()
+        menuBarManager.iceBarPanel.close()
+
+        for section in menuBarManager.sections {
+            if section.name == .visible || section.name == self.name || (self.name == .alwaysHidden && section.name == .hidden) {
+                section.desiredState = .showSection
+                section.controlItem.state = .showSection
+            }
+        }
+
+        rehideTask?.cancel()
+        rehideTask = Task { [weak self, weak appState] in
+            try? await Task.sleep(for: .seconds(interval))
+            guard !Task.isCancelled, let self, let appState else { return }
+            if self.isMouseInsideActiveArea() {
+                self.startRehideChecks()
+                return
+            }
+            if await appState.itemManager.isAnyMenuBarItemMenuOpen() {
+                self.startRehideChecks()
+                return
+            }
+            self.hide()
+        }
+    }
+
     /// Toggles the visibility of the section.
     func toggle(triggeredByHotkey: Bool = false) {
         if isHidden {
