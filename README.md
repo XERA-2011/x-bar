@@ -44,6 +44,12 @@ xBar provides two distinct operation modes tailored to your workflow:
 
 ---
 
+## 📦 Installation
+
+Download the latest release package (`xBar.dmg`) from [GitHub Releases](https://github.com/XERA-2011/x-bar/releases). Open the DMG and drag **xBar** into your `Applications` folder.
+
+---
+
 ## 🛠 Building from Source
 
 ```bash
@@ -51,11 +57,14 @@ xBar provides two distinct operation modes tailored to your workflow:
 git clone https://github.com/XERA-2011/x-bar.git
 cd x-bar
 
-# Build the release application bundle
+# Build the release application bundle (outputs to dist/xBar.app)
 ./scripts/build-app.sh release
+
+# Or package into DMG, ZIP and checksums (outputs to dist/)
+./scripts/package.sh
 ```
 
-The output bundle will be located at `dist/xBar.app`. Move it to `/Applications` to run.
+The output bundle will be located at `dist/xBar.app` (or `dist/xBar.dmg`). Move it to `/Applications` to run.
 
 ---
 
