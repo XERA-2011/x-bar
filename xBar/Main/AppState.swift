@@ -22,9 +22,6 @@ final class AppState {
     /// A Boolean value that indicates whether the user is dragging a menu bar item.
     private(set) var isDraggingMenuBarItem = false
 
-    /// Tracks presentation of the update consent sheet.
-    var isUpdateConsentPresented = false
-
     /// Tracks presentation of the onboarding sheet.
     var isOnboardingPresented = false
 
@@ -130,11 +127,6 @@ final class AppState {
 
         configureCancellables()
         diagLog.debug("setupTask: AppState setup sequence complete")
-    }
-
-    /// Allows explicit starting of the updater from UI flows.
-    func startUpdaterIfNeeded() {
-        updatesManager.startUpdaterIfNeeded()
     }
 
     /// Presents the onboarding sheet if the user hasn't seen it yet.
@@ -269,13 +261,7 @@ final class AppState {
                 // Update openWindows tracking based on actual window visibility
                 if isPresented {
                     self.openWindows.insert(.settings)
-                    // Start Sparkle consent flow the first time settings is shown.
-                    if !Defaults.bool(forKey: .hasSeenUpdateConsent) {
-                        self.isUpdateConsentPresented = true
-                    } else {
-                        self.updatesManager.startUpdaterIfNeeded()
-                        self.presentOnboardingIfNeeded()
-                    }
+                    self.presentOnboardingIfNeeded()
                 } else {
                     self.openWindows.remove(.settings)
                     self.deactivate(withPolicy: .accessory)

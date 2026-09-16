@@ -91,7 +91,6 @@ $(SRCROOT)/xBar/Settings/SettingsPanes/Layout/LayoutBarsSection.swift
 $(SRCROOT)/xBar/Settings/SettingsPanes/MenuBarLayoutSettingsPane.swift
 $(SRCROOT)/xBar/Settings/SettingsView.swift
 $(SRCROOT)/xBar/Settings/SettingsWindow.swift
-$(SRCROOT)/xBar/Settings/UpdateConsentSheet.swift
 $(SRCROOT)/xBar/Shared/Bridging/Bridging.swift
 $(SRCROOT)/xBar/Shared/Bridging/Shims.swift
 $(SRCROOT)/xBar/Shared/Services/ExtrasMenuBarProbeStore.swift
