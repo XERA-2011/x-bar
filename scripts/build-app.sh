@@ -9,8 +9,19 @@ echo "==> Building xBar (${CONFIGURATION})..."
 
 cd "${ROOT_DIR}"
 
-SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk \
-SWIFT_EXEC="${ROOT_DIR}/scripts/swiftc-wrapper" \
+if [[ -z "${SDKROOT:-}" ]]; then
+    if [[ -d "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk" ]]; then
+        export SDKROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk"
+    elif [[ -d "/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk" ]]; then
+        export SDKROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk"
+    else
+        export SDKROOT="$(xcrun --show-sdk-path 2>/dev/null || true)"
+    fi
+fi
+
+SWIFT_EXEC="${SWIFT_EXEC:-${ROOT_DIR}/scripts/swiftc-wrapper}"
+export SWIFT_EXEC
+
 swift build -c "${CONFIGURATION}"
 
 if [[ "${CONFIGURATION}" == "release" ]]; then
