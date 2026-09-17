@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/platform-macOS%2014.0%2B-blue?style=flat-square" alt="Platform: macOS 14.0+" />
+  <img src="https://img.shields.io/badge/platform-macOS%2014.0--26.x-blue?style=flat-square" alt="Platform: macOS 14.0 - 26.x" />
   <img src="https://img.shields.io/badge/Swift-6.0-orange?style=flat-square" alt="Swift 6.0" />
   <img src="https://img.shields.io/badge/license-GPL--3.0-green?style=flat-square" alt="License: GPL-3.0" />
   <a href="https://github.com/XERA-2011/sponsor"><img src="https://img.shields.io/badge/Sponsor-❤️-ff69b4.svg?style=flat-square" alt="Sponsor" /></a>
@@ -38,7 +38,7 @@ xBar provides two distinct operation modes tailored to your workflow:
 
 ## 🖥 System Requirements
 
-- **Operating System**: macOS 14.0 (Sonoma) or later.
+- **Operating System**: macOS 14.0 – 26.x (Sonoma through Tahoe). *(Note: macOS 27+ is not supported).*
 - **Permissions**:
   - **Accessibility** *(Required)*: Enables menu bar item arrangement and click routing.
   - **Screen Recording** *(Optional)*: Required only for live icon capture in Floating Bar mode.
